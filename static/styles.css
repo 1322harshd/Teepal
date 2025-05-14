@@ -1,6 +1,6 @@
 .top_bar{
     display:flex;
-    background-color: aliceblue;
+    background-color: #ffff;
     width: 100%;
     position: relative; /* Ensure child elements with absolute positioning are positioned relative to this container */
     
@@ -79,4 +79,30 @@
 }
 .sub_menu_link:hover p{
     font-weight:600;
+}
+nav{
+    background-color:#F8F9FA;
+    width:100%;
+    display:flex;
+    height: 20%;
+}
+nav ul {
+    display: flex;
+    justify-content: flex-start; /* Align the links to the far left */
+    padding: 0;
+}
+nav ul li {
+    display: inline-block;
+    list-style: none;
+    padding: 10px 20px; /* Use padding instead of margin to prevent shifting */
+}
+nav ul li a {
+    color: black;
+    text-decoration: none;
+    transition: font-weight 0.3s, transform 0.3s; /* Smooth transition for font-weight and transform */
+    display: inline-block; /* Ensure the link is treated as a block for padding */
+}
+nav ul li a:hover {
+    font-weight: bold;
+    transform: scale(1.05); /* Slightly scale the link without affecting spacing */
 }
