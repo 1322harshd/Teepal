@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TeePal</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" type="text/css">
 </head>
 <body>
     <header>
@@ -43,18 +43,20 @@
             </div>
         </div>
         <nav>
-            <div class="search_bar">
-              <input type="text" placeholder="Search...">
-              <button type="submit">Search</button>
-            </div>
-            <div class="nav_buttons">
-              <ul>
-                <li><a href="#">Homepage</a></li>
-                <li><a href="#">Products</a></li>
-                <li><a href="#">Saved</a></li>
-                <li><a href="#">Shopping Cart</a></li>
-                <li><a href="#">Orders</a></li>
-              </ul>
+            <div class="navdiv">
+                <div class="search_bar">
+                    <input type="text" placeholder="Search...">
+                    <i class="fa fa-search"></i>
+                </div>
+                <div class="nav_buttons">
+                    <ul>
+                    <li><a href="#">Homepage</a></li>
+                    <li><a href="#">Products</a></li>
+                    <li><a href="#">Saved</a></li>
+                    <li><a href="#">Shopping Cart</a></li>
+                    <li><a href="#">Orders</a></li>
+                    </ul>
+                </div>
             </div>
         </nav>
            
