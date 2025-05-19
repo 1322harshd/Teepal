@@ -65,14 +65,18 @@
     </header>
     <main>
        
-        <section>
-            <div class="section-title">Trending Orders</div>
-            <div class="grid">
-                <div class="grid-item"></div>
-                <div class="grid-item"></div>
-                <div class="grid-item"></div>
-                <div class="grid-item"></div>
-            </div>
+     
+        <section id="trending_orders">
+              <h2>Trending Orders</h2>  
+            {% for order in trending_orders %}
+                <div class="to_1">
+                    <img src="{{ url_for('static', filename=order.image) }}" alt="{{ order.item }}" width="100">
+                    <span>{{order.brand}}</span>
+                    <h5>{{ order.item }}</h5>
+                    <h4>${{ order.price }}</h4>
+                    <a href="#"><i class="fas fa-shopping-cart"></i></a>
+                </div>
+            {% endfor %}
         </section>
         <section>
             <div class="section-title">Recent Orders</div>
