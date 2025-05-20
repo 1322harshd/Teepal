@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" type="text/css">
 </head>
 <body>
+    <div class="blur-overlay" id="blurOverlay"></div>
     <header>
         <div class="top_bar">
             <img src="{{ url_for('static', filename='logo.png') }}" alt="logo" class="logo">
@@ -64,41 +65,38 @@
       
     </header>
     <main>
-       
-     
-        <section id="trending_orders">
-              <h2>Trending Orders</h2>  
-            {% for order in trending_orders %}
-                <div class="to_1">
-                    <img src="{{ url_for('static', filename=order.image) }}" alt="{{ order.item }}" width="100">
-                    <span>{{order.brand}}</span>
-                    <h5>{{ order.item }}</h5>
-                    <h4>${{ order.price }}</h4>
-                    <a href="#"><i class="fas fa-shopping-cart"></i></a>
-                </div>
-            {% endfor %}
-        </section>
-        <section>
-            <div class="section-title">Recent Orders</div>
-            <div class="grid">
-                <div class="grid-item"></div>
-                <div class="grid-item"></div>
-                <div class="grid-item"></div>
-                <div class="grid-item"></div>
-            </div>
-        </section>
-        <section>
-            <div class="section-title">My Orders</div>
-            <div class="grid">
-                <div class="grid-item"></div>
-                <div class="grid-item"></div>
-                <div class="grid-item"></div>
-                <div class="grid-item"></div>
-            </div>
-        </section>
+        {% import "_order_list.html" as lists %}
+        {{ lists.order_list('Trending Orders', trending_orders, 'trending_orders') }}
+        {{ lists.order_list('Recent Orders', recent_orders, 'recent_orders') }}
+        {{ lists.order_list('My Orders', my_orders, 'my_orders') }}
     </main>
-    <footer>
-        Footer
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-logo-social">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="logo" class="footer-logo">
+                <div class="footer-social">
+                    <a href="https://facebook.com" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://twitter.com" target="_blank" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="https://instagram.com" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="https://linkedin.com" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+            <div class="footer-links">
+                <a href="#">About Us</a>
+                <a href="#">Contact</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Careers</a>
+                <a href="#">Support</a>
+            </div>
+            <div class="footer-contact">
+                <p><i class="fas fa-envelope"></i> support@teepal.com</p>
+                <p><i class="fas fa-phone"></i> +1 234 567 8901</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 TeePal. All rights reserved.</p>
+        </div>
     </footer>
   <script src="{{ url_for('static', filename='scripts.js') }}"></script>
 </body>

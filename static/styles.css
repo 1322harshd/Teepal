@@ -28,6 +28,7 @@
     width: 320px;
     max-height: 0px;
     overflow:hidden;
+    z-index: 10; 
 }
 .sub_menu_wrap.open_menu{
     max-height: 400px;
@@ -137,15 +138,36 @@ nav ul li a:hover{
     transition: right 0.6s;
     z-index: 2;
 }
-#trending_orders {
+/* Scrollable Order List Row (applies to all lists) */
+.order-list-scroll {
     display: flex;
-    justify-content: center;
+    flex-direction: row;
     gap: 32px;
     margin: 40px 0;
-    flex-wrap: wrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    padding-bottom: 12px;
+    scrollbar-width: thin;
+    scrollbar-color: #ccc #fafafa;
+    margin-left:5%;
 }
 
-#trending_orders .to_1 {
+.order-list-scroll::-webkit-scrollbar {
+    height: 10px;
+}
+
+.order-list-scroll::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 5px;
+}
+
+.order-list-scroll::-webkit-scrollbar-track {
+    background: #fafafa;
+}
+
+/* Order Card */
+.order-list-scroll .to_1 {
     background: #fff;
     width: 260px;
     min-width: 220px;
@@ -160,12 +182,12 @@ nav ul li a:hover{
     position: relative;
 }
 
-#trending_orders .to_1:hover {
+.order-list-scroll .to_1:hover {
     box-shadow: 0 8px 32px rgba(0,0,0,0.14);
     transform: translateY(-6px) scale(1.03);
 }
 
-#trending_orders .to_1 img {
+.order-list-scroll .to_1 img {
     width: 100%;
     height: 220px;
     object-fit: contain;
@@ -174,33 +196,30 @@ nav ul li a:hover{
     background: #fafafa;
 }
 
-#trending_orders .brand {
+.order-list-scroll .to_1 span {
+    margin-bottom: 2px;
+    margin-top: 0;
+    padding: 0;
+    display: block;
     color: #888;
     font-size: 15px;
-    margin-bottom: 4px;
     text-align: left;
     width: 100%;
 }
 
-#trending_orders .title {
+.order-list-scroll .to_1 h5 {
     font-weight: 700;
     font-size: 18px;
+    margin-top: 2px;
     margin-bottom: 8px;
+    padding: 0;
     text-align: left;
     width: 100%;
     color: #222;
     font-family: inherit;
 }
 
-#trending_orders .stars {
-    color: #FFD700;
-    font-size: 16px;
-    margin-bottom: 10px;
-    text-align: left;
-    width: 100%;
-}
-
-#trending_orders .price-cart-row {
+.to_1-footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -208,27 +227,130 @@ nav ul li a:hover{
     margin-top: 8px;
 }
 
-#trending_orders .price {
-    color: #1abc9c;
-    font-size: 20px;
-    font-weight: 600;
+.to_1-footer h4 {
+    margin: 0;
+    color: #888;
+    font-size: larger;
 }
 
-#trending_orders .cart-btn {
+.to_1-footer a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: #e8f6ea;
     border-radius: 50%;
     width: 38px;
     height: 38px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     color: #1abc9c;
     font-size: 22px;
     border: none;
     cursor: pointer;
     transition: background 0.2s;
+    margin-left: 8px;
+    text-decoration: none;
 }
 
-#trending_orders .cart-btn:hover {
+.to_1-footer a:hover {
     background: #d1f2eb;
+}
+
+/* Blur overlay for user menu */
+.blur-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    backdrop-filter: blur(4px);
+    background: rgba(0,0,0,0.08);
+    z-index: 5;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+.blur-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* Site Footer */
+.site-footer {
+    background: linear-gradient(90deg, #222 0%, #444 100%);
+    color: #fff;
+    padding: 40px 0 0 0;
+    font-family: inherit;
+    margin-top: 40px;
+}
+
+.footer-content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 5vw;
+    gap: 32px;
+}
+
+.footer-logo-social {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+}
+
+.footer-logo {
+    width: 140px;
+    max-width: 100%;
+    margin-bottom: 8px;
+}
+
+.footer-social a {
+    color: #fff;
+    font-size: 22px;
+    margin-right: 18px;
+    transition: color 0.2s;
+    display: inline-block;
+}
+.footer-social a:last-child {
+    margin-right: 0;
+}
+.footer-social a:hover {
+    color: #ffd700;
+}
+
+.footer-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 150px;
+}
+.footer-links a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 0.2s;
+}
+.footer-links a:hover {
+    color: #ffd700;
+}
+
+.footer-contact {
+    font-size: 15px;
+    color: #ccc;
+}
+.footer-contact i {
+    margin-right: 8px;
+    color: #ffd700;
+}
+
+.footer-bottom {
+    text-align: center;
+    padding: 18px 0 10px 0;
+    background: #181818;
+    color: #bbb;
+    font-size: 15px;
+    margin-top: 32px;
+    letter-spacing: 0.5px;
 }

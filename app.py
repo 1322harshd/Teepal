@@ -9,7 +9,22 @@ def home():
         {'item': 'Mug', 'price': 7, 'image': 'mug.jfif','brand':'milton'},
         {'item': 'Cap', 'price': 5, 'image': 'cap.jfif','brand':'yankees'}
     ]
-    return render_template('Home.html', trending_orders=trending_orders)
+    recent_orders = [
+        {'item': 'Bottle', 'price': 12, 'image': 'Unknown.jpeg','brand':'milton'},
+        {'item': 'Bag', 'price': 20, 'image': 'bag.jpeg','brand':'wildcraft'},
+        {'item': 'Shoes', 'price': 50, 'image': 'shoes.jpeg','brand':'nike'}
+    ]
+    my_orders = [
+        {'item': 'Notebook', 'price': 3, 'image': 'notebook.jpeg','brand':'classmate'},
+        {'item': 'Pen', 'price': 1, 'image': 'pen.png','brand':'pilot'},
+        {'item': 'Watch', 'price': 100, 'image': 'watch.jpeg','brand':'casio'}
+    ]
+    return render_template(
+        'Home.html',
+        trending_orders=trending_orders,
+        recent_orders=recent_orders,
+        my_orders=my_orders
+    )
 
 if __name__ == '__main__':
     app.run(debug=True)
