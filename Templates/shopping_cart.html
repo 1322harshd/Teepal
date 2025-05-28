@@ -13,15 +13,23 @@
         <span>{{ product.brand }}</span>
         <h5>{{ product.item }}</h5>
         <label class="quantity" for="quantity">Quantity:</label>
-        <input type="number" name="quantity" id="quantity" value="1" min="1">
+        <input type="number" name="quantity" id="quantity_{{ loop.index0 }}" value="1" min="1" onchange="updateTotal({{ loop.index0 }}, {{ product.price }})">
+        <span>× ${{ product.price }} = $<span id="total_{{ loop.index0 }}">{{ product.price }}</span></span>
         </div>
         <div class="sc_1_right">
           <a href="#"><i class="fa-solid fa-xmark"></i></a><br>
           <button onclick="window.location.href='/'">Design</button>
-          <a href="#"><i class="fa-solid fa-heart"></i></i></a>
+          <a href="#"><i class="fa-solid fa-heart" title="Save"></i></i></a>
         </div>
        
       </div>
     {% endfor %}
   </div>
+  </div>
+  <script>
+    function updateTotal(index, price) {
+      const qty = document.getElementById('quantity_' + index).value;
+      document.getElementById('total_' + index).textContent = (qty * price).toFixed(2);
+    }
+  </script>
 {% endblock %}
