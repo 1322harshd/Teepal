@@ -6,6 +6,8 @@
     <title>TeePal</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" type="text/css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+
 </head>
 <body>
     <div class="blur-overlay" id="blurOverlay"></div>
@@ -43,7 +45,7 @@
                 </div>
             </div>
         </div>
-        <nav>
+        <nav style="font-family: 'Poppins', sans-serif;">
             <div class="navdiv">
                 <div class="search_bar">
                     <input type="text" placeholder="Search...">
@@ -51,7 +53,7 @@
                 </div>
                 <div class="nav_buttons">
                     <ul>
-                    <li><a href="#">Homepage</a></li>
+                    <li><a href="/">Homepage</a></li>
                     <li><a href="#">Products</a></li>
                     <li><a href="#">Saved</a></li>
                     <li><a href="/shopping_cart">Shopping Cart</a></li>

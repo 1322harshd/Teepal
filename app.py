@@ -25,9 +25,15 @@ def home():
         recent_orders=recent_orders,
         my_orders=my_orders
     )
+
 @app.route('/shopping_cart')
 def shopping_cart():
-    return render_template('shopping_cart.html')
+    cart_items = [
+        {'item': 'T-shirt', 'price': 10, 'image': 'products/tshirt.jfif', 'brand': 'abibas'},
+        {'item': 'Mug', 'price': 7, 'image': 'products/mug.jfif', 'brand': 'milton'},
+        {'item': 'Cap', 'price': 5, 'image': 'products/cap.jfif', 'brand': 'yankees'}
+    ]
+    return render_template('shopping_cart.html', products=cart_items)
 
 if __name__ == '__main__':
     app.run(debug=True)
