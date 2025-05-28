@@ -392,7 +392,7 @@ nav ul li a:hover{
     padding-top: 30px;
     padding-right: 40px; 
 }
-.sc_1_right a{
+.sc_1_right a:first-of-type{
     position:absolute;
     top:0;
     right:0;
@@ -411,7 +411,7 @@ nav ul li a:hover{
     margin-left: 8px;
     text-decoration: none;
 }
-.sc_1_right a:hover {
+.sc_1_right a:first-of-type:hover {
     background: gold;
 }
 .sc_1_right button{
@@ -432,6 +432,33 @@ nav ul li a:hover{
 .sc_1_right button:hover{
    color:gold;
 }
+.sc_1_right a:last-of-type {
+    position:absolute;
+    bottom:5%;
+    right:50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fdeaea;           
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    color: #e74c3c;                
+    font-size: 22px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    margin-left: 8px;
+    text-decoration: none;
+
+}
+
+.sc_1_right a:last-of-type:hover {
+    background: #f8d7da;          
+    transform: scale(1.1);         
+}
+
+
 .sc_1_middle input[type="number"] {
     width: 80px; 
     font-size: 18px;
