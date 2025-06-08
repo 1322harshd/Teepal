@@ -35,5 +35,14 @@ def shopping_cart():
     ]
     return render_template('shopping_cart.html', products=cart_items)
 
+@app.route('/saved_items')
+def saved_items():
+    saved_items = [
+        {'item': 'T-shirt', 'price': 10, 'image': 'products/tshirt.jfif', 'brand': 'abibas'},
+        {'item': 'Mug', 'price': 7, 'image': 'products/mug.jfif', 'brand': 'milton'},
+        {'item': 'Cap', 'price': 5, 'image': 'products/cap.jfif', 'brand': 'yankees'}
+    ]
+    return render_template('saved_items.html', products=saved_items)
+
 if __name__ == '__main__':
     app.run(debug=True)

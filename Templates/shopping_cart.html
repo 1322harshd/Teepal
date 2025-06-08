@@ -1,35 +1,141 @@
 {% extends "base.html" %}
 {% block content %} 
 <h2>Shopping Cart</h2>
-  <div class="total">
-    
-    
+
+<div class="order-summary-card" id="orderSummary">
+  <h3>Order Summary</h3>
+  <div>
+    <span>Total Items: <span id="summaryTotalItems">0</span></span>
+    <span style="margin-left: 30px;">Total Price: $<span id="summaryTotalPrice">0.00</span></span>
   </div>
-  <div id="shopping_cart" class="lists">
-    {% for product in products %}
-      <div class="sc_1">
-        <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.item }}" width="100">
-        <div class="sc_1_middle">
+  <button class="payment-btn" onclick="alert('Proceeding to payment...')">Proceed to Payment</button>
+</div>
+
+<!-- Cart Details Table -->
+<div class="cart-details-table">
+  <table>
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Brand</th>
+        <th>Unit Price</th>
+        <th>Quantity</th>
+        <th>Subtotal</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for product in products %}
+      <tr>
+        <td>
+          <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.item }}" class="cart-thumb">
+          <span class="cart-item-name">{{ product.item }}</span>
+        </td>
+        <td>{{ product.brand }}</td>
+        <td>${{ product.price }}</td>
+        <td>
+          <input type="number" name="quantity" id="table_quantity_{{ loop.index0 }}" value="1" min="1" onchange="updateTableTotal({{ loop.index0 }}, {{ product.price|float }})">
+        </td>
+        <td>$<span id="table_total_{{ loop.index0 }}">{{ product.price }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="4" style="text-align:right;font-weight:bold;">Total:</td>
+        <td style="font-weight:bold;">$<span id="table_grand_total">0.00</span></td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+
+<div id="shopping_cart" class="lists">
+  {% for product in products %}
+    <div class="sc_1">
+      <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.item }}" width="100">
+      <div class="sc_1_middle">
         <span>{{ product.brand }}</span>
         <h5>{{ product.item }}</h5>
         <label class="quantity" for="quantity">Quantity:</label>
-        <input type="number" name="quantity" id="quantity_{{ loop.index0 }}" value="1" min="1" onchange="updateTotal({{ loop.index0 }}, {{ product.price }})">
+        <input type="number" name="quantity" id="quantity_{{ loop.index0 }}" value="1" min="1" onchange="updateTotal({{ loop.index0 }}, {{ product.price|float }})">
         <span>× ${{ product.price }} = $<span id="total_{{ loop.index0 }}">{{ product.price }}</span></span>
-        </div>
-        <div class="sc_1_right">
-          <a href="#"><i class="fa-solid fa-xmark"></i></a><br>
-          <button onclick="window.location.href='/'">Design</button>
-          <a href="#"><i class="fa-solid fa-heart" title="Save"></i></i></a>
-        </div>
-       
       </div>
+      <div class="sc_1_right">
+        <a href="#"><i class="fa-solid fa-xmark"></i></a><br>
+        <button onclick="window.location.href='/'">Design</button>
+        <a href="#"><i class="fa-solid fa-heart" title="Save"></i></a>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<script>
+  // Product prices from template context
+  const productPrices = [
+    {% for product in products %}
+      {{ product.price }}{% if not loop.last %},{% endif %}
     {% endfor %}
-  </div>
-  </div>
-  <script>
-    function updateTotal(index, price) {
-      const qty = document.getElementById('quantity_' + index).value;
-      document.getElementById('total_' + index).textContent = (qty * price).toFixed(2);
+  ];
+
+  function updateTotal(index, price) {
+    const qty = document.getElementById('quantity_' + index).value;
+    document.getElementById('total_' + index).textContent = (qty * price).toFixed(2);
+    updateOrderSummary();
+    updateTableFromCart();
+  }
+
+  function updateOrderSummary() {
+    let totalItems = 0;
+    let totalPrice = 0;
+    for (let i = 0; i < productPrices.length; i++) {
+      const qtyInput = document.getElementById('quantity_' + i);
+      const qty = qtyInput ? parseInt(qtyInput.value) || 0 : 0;
+      totalItems += qty;
+      totalPrice += qty * productPrices[i];
     }
-  </script>
+    document.getElementById('summaryTotalItems').textContent = totalItems;
+    document.getElementById('summaryTotalPrice').textContent = totalPrice.toFixed(2);
+  }
+
+  // Table logic
+  function updateTableTotal(index, price) {
+    const qty = document.getElementById('table_quantity_' + index).value;
+    document.getElementById('table_total_' + index).textContent = (qty * price).toFixed(2);
+    updateTableGrandTotal();
+    updateCartFromTable();
+  }
+
+  function updateTableGrandTotal() {
+    let grandTotal = 0;
+    for (let i = 0; i < productPrices.length; i++) {
+      const qtyInput = document.getElementById('table_quantity_' + i);
+      const qty = qtyInput ? parseInt(qtyInput.value) || 0 : 0;
+      grandTotal += qty * productPrices[i];
+    }
+    document.getElementById('table_grand_total').textContent = grandTotal.toFixed(2);
+  }
+
+  // Sync table and card quantities
+  function updateCartFromTable() {
+    for (let i = 0; i < productPrices.length; i++) {
+      const tableQty = document.getElementById('table_quantity_' + i).value;
+      document.getElementById('quantity_' + i).value = tableQty;
+      document.getElementById('total_' + i).textContent = (tableQty * productPrices[i]).toFixed(2);
+    }
+    updateOrderSummary();
+  }
+  function updateTableFromCart() {
+    for (let i = 0; i < productPrices.length; i++) {
+      const cartQty = document.getElementById('quantity_' + i).value;
+      document.getElementById('table_quantity_' + i).value = cartQty;
+      document.getElementById('table_total_' + i).textContent = (cartQty * productPrices[i]).toFixed(2);
+    }
+    updateTableGrandTotal();
+  }
+
+  // Initialize on page load
+  window.onload = function() {
+    updateOrderSummary();
+    updateTableGrandTotal();
+  };
+</script>
 {% endblock %}

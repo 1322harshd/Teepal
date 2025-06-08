@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %} 
+<h2>Saved Items</h2>
+<div id="saved_items" class="lists">
+  {% for product in products %}
+    <div class="sc_1">
+      <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.item }}" width="100">
+      <div class="sc_1_middle">
+        <span>{{ product.brand }}</span>
+        <h5>{{ product.item }}</h5>
+        <span>${{ product.price }}</span>
+      </div>
+      <div class="sc_1_right">
+        <a href="#"><i class="fa-solid fa-xmark"></i></a><br>
+        <button onclick="window.location.href='/'">Design</button>
+        <a href="#"><i class="fa-solid fa-shopping-cart" title="Add to Cart"></i></a>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}
