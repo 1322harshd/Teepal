@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %} 
+<h2>My Orders</h2>
+<div id="orders_list" class="lists">
+  {% for product in products %}
+    <div class="sc_1">
+      <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.item }}" width="100">
+      <div class="sc_1_middle">
+        <span>{{ product.brand }}</span>
+        <h5>{{ product.item }}</h5>
+        <span>${{ product.price }}</span>
+        <div style="margin-top:8px; color:#1abc9c; font-size:15px;">
+          Estimated Delivery: {{ "2025-06-1" | replace("1", loop.index|string) }}
+        </div>
+      </div>
+      <div class="sc_1_right">
+        <a href="#"><i class="fa-solid fa-xmark" title="Cancel Order"></i></a><br>
+        <button onclick="window.location.href='/'">Reorder</button>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

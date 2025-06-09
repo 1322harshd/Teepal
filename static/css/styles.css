@@ -552,6 +552,23 @@ nav ul li a:hover{
     background: #ffe066;
     color: #111;
 }
+.auth-links a {
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-weight: 500;
+    text-decoration: none;
+    color: #444;
+    background: #ffd700;
+    transition: background 0.2s, color 0.2s;
+}
+.auth-links a.signup-btn {
+    background: #fff;
+    border: 1px solid #ffd700;
+}
+.auth-links a:hover {
+    background: #ffe066;
+    color: #111;
+}
 @media (max-width: 700px) {
     .cart-details-table {
         padding: 8px 2px;
