@@ -32,10 +32,6 @@ def login():
             error = 'Invalid credentials'
     return render_template('login.html', error=error)
 
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('login'))
 
 @app.route('/logout_and_home')
 def logout_and_home():
@@ -51,11 +47,11 @@ def register():
         password = request.form['password']
         confirm_password = request.form['confirm_password']
 
-        # Email validation
+
         email_regex = r'^[\w\.-]+@[\w\.-]+\.\w+$'
         if not re.match(email_regex, email):
             error = "Please enter a valid email address."
-        # Password strength check
+
         elif len(password) < 8 or not re.search(r'[A-Z]', password) or not re.search(r'[a-z]', password) or not re.search(r'[0-9]', password):
             error = "Password must be at least 8 characters and include uppercase, lowercase, and a number."
         elif password != confirm_password:
