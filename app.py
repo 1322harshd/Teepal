@@ -1,6 +1,37 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for, session
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key'
+
+HARDCODED_USER = 'admin'
+HARDCODED_PASS = 'password123'
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    error = None
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        if username == HARDCODED_USER and password == HARDCODED_PASS:
+            session['logged_in'] = True
+            session['username'] = username
+            return redirect(url_for('home'))
+        else:
+            error = 'Invalid credentials'
+    return render_template('login.html', error=error)
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    # For now, just show the form and redirect to login
+    if request.method == 'POST':
+        # You can add registration logic here later
+        return redirect(url_for('login'))
+    return render_template('signup.html')
 
 @app.route('/')
 def home():
