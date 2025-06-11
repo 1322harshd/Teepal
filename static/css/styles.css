@@ -569,6 +569,9 @@ nav ul li a:hover{
     background: #ffe066;
     color: #111;
 }
+.empty-message {
+  margin: 0 auto;
+}
 @media (max-width: 700px) {
     .cart-details-table {
         padding: 8px 2px;
@@ -652,5 +655,16 @@ nav ul li a:hover{
   left: 0; top: 0; right: 0; bottom: 0;
   width: 100vw; height: 100vh;
   background: rgba(0,0,0,0.13);
-  backdrop-filter: blur(2px);
+}
+
+html, body {
+  height: 100%;
+}
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+footer {
+  margin-top: auto;
 }

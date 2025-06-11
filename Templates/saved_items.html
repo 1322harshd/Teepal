@@ -1,21 +1,29 @@
 {% extends "base.html" %}
 {% block content %} 
 <h2>Saved Items</h2>
-<div id="saved_items" class="lists">
-  {% for product in products %}
-    <div class="sc_1">
-      <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.item }}" width="100">
-      <div class="sc_1_middle">
-        <span>{{ product.brand }}</span>
-        <h5>{{ product.item }}</h5>
-        <span>${{ product.price }}</span>
-      </div>
-      <div class="sc_1_right">
-        <a href="#"><i class="fa-solid fa-xmark"></i></a><br>
-        <button onclick="window.location.href='/'">Design</button>
-        <a href="#"><i class="fa-solid fa-shopping-cart" title="Add to Cart"></i></a>
-      </div>
+<div id="saved_items" class="lists" style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+  {% if products|length == 0 %}
+    <div class="empty-message" style="text-align:center; color:#888;">
+      <i class="fa-solid fa-box-open" style="font-size:2.5rem; margin-bottom:10px;"></i><br>
+      No items here yet.<br>
+      <a href="{{ url_for('home') }}" class="btn-primary" style="margin-top:18px;">Go Shopping</a>
     </div>
-  {% endfor %}
+  {% else %}
+    {% for product in products %}
+      <div class="sc_1">
+        <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.item }}" width="100">
+        <div class="sc_1_middle">
+          <span>{{ product.brand }}</span>
+          <h5>{{ product.item }}</h5>
+          <span>${{ product.price }}</span>
+        </div>
+        <div class="sc_1_right">
+          <a href="#"><i class="fa-solid fa-xmark"></i></a><br>
+          <button onclick="window.location.href='/'">Design</button>
+          <a href="#"><i class="fa-solid fa-shopping-cart" title="Add to Cart"></i></a>
+        </div>
+      </div>
+    {% endfor %}
+  {% endif %}
 </div>
 {% endblock %}

@@ -15,12 +15,12 @@
         <div class="top_bar">
             <img src="{{ url_for('static', filename='logos/logo.png') }}" alt="logo" class="logo">
             {% if session.get('logged_in') %}
-                <img src="{{ url_for('static', filename='logos/user.jpg') }}" alt="user" class="user" onclick="toggleMenu()">
+                <img src="{{ url_for('static', filename='users/' ~ session.get('user_image', 'user.jpg')) }}" alt="user" class="user" onclick="toggleMenu()">
                 <div class="sub_menu_wrap" id="subMenu">
                     <div class="sub_menu">
                         <div class="user_info">
-                            <img  src="{{ url_for('static', filename='logos/user.jpg') }}" alt="user">
-                            <h3>James Aldrino</h3>
+                            <img src="{{ url_for('static', filename='users/' ~ session.get('user_image', 'user.jpg')) }}" alt="user">
+                            <h3>{{ session.get('display_name', session.get('username', 'User')) }}</h3>
                         </div>
                         <hr>
                         <a href="#" class="sub_menu_link">
@@ -71,7 +71,7 @@
         </nav>
            
     </header>
-    <main>
+    <main style="flex:1; display:flex; flex-direction:column;">
         {% block content %}{% endblock %}
     </main>
    <footer class="site-footer">
