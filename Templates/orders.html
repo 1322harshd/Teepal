@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %} 
+<h2>My Orders</h2>
+<div id="orders_list" class="lists" style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+  {% if products|length == 0 %}
+    <div class="empty-message" style="text-align:center; color:#888;">
+      <i class="fa-solid fa-box-open" style="font-size:2.5rem; margin-bottom:10px;"></i><br>
+      No items here yet.<br>
+      <a href="{{ url_for('home') }}" class="btn-primary" style="margin-top:18px;">Go Shopping</a>
+    </div>
+  {% else %}
+    {% for product in products %}
+      <div class="sc_1">
+        <img src="{{ url_for('static', filename=product.Image) }}" alt="{{ product.Item }}" width="100">
+        <div class="sc_1_middle">
+          <span>{{ product.Brand }}</span>
+          <h5>{{ product.Item }}</h5>
+          <span>Qty: {{ product.Quantity }}</span><br>
+          <span>Price: ${{ product.PriceAtPurchase }}</span>
+          <div style="margin-top:8px; color:#1abc9c; font-size:15px;">
+            Ordered At: {{ product.OrderedAt }}
+          </div>
+        </div>
+        <div class="sc_1_right">
+          <a href="#"><i class="fa-solid fa-xmark" title="Cancel Order"></i></a><br>
+          <button onclick="window.location.href='/'">Reorder</button>
+        </div>
+      </div>
+    {% endfor %}
+  {% endif %}
+</div>
+{% endblock %}

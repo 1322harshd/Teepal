@@ -4,11 +4,11 @@
     <div id="{{ section_id }}" class="order-list-scroll">
         {% for order in orders %}
             <div class="to_1">
-                <img src="{{ url_for('static', filename=order.image) }}" alt="{{ order.item }}" width="100">
-                <span>{{ order.brand }}</span>
-                <h5>{{ order.item }}</h5>
+                <img src="{{ url_for('static', filename=order.Image) }}" alt="{{ order.Item }}" width="100">
+                <span>{{ order.Brand }}</span>
+                <h5>{{ order.Item }}</h5>
                 <div class="to_1-footer">
-                    <h4>${{ order.price }}</h4>
+                    <h4>${{ order.Price }}</h4>
                     <a href="#"><i class="fas fa-shopping-cart"></i></a>
                 </div>
             </div>

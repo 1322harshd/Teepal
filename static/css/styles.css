@@ -466,5 +466,205 @@ nav ul li a:hover{
     border: none;
     box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
 }
+.order-summary-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    padding: 20px 30px;
+    margin: 24px 0 32px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+.order-summary-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+.order-summary-card div span {
+    font-size: 1rem;
+    font-weight: 500;
+}
+.cart-details-table {
+    width: 90%;
+    margin: 0 auto 32px auto;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    padding: 18px 24px;
+    overflow-x: auto;
+}
+.cart-details-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: inherit;
+}
+.cart-details-table th, .cart-details-table td {
+    padding: 12px 10px;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 16px;
+}
+.cart-details-table th {
+    background: #fafafa;
+    font-weight: 600;
+    color: #444;
+}
+.cart-details-table tfoot td {
+    background: #fafafa;
+    font-size: 18px;
+}
+.cart-thumb {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    border-radius: 10px;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+.cart-item-name {
+    font-weight: 500;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+.cart-details-table input[type="number"] {
+    width: 60px;
+    font-size: 16px;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: none;
+}
+.payment-btn {
+    margin-top: 18px;
+    padding: 12px 32px;
+    background: #ffd700;
+    color: #222;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.payment-btn:hover {
+    background: #ffe066;
+    color: #111;
+}
+.auth-links a {
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-weight: 500;
+    text-decoration: none;
+    color: #444;
+    background: #ffd700;
+    transition: background 0.2s, color 0.2s;
+}
+.auth-links a.signup-btn {
+    background: #fff;
+    border: 1px solid #ffd700;
+}
+.auth-links a:hover {
+    background: #ffe066;
+    color: #111;
+}
+.empty-message {
+  margin: 0 auto;
+}
+@media (max-width: 700px) {
+    .cart-details-table {
+        padding: 8px 2px;
+    }
+    .cart-details-table th, .cart-details-table td {
+        padding: 6px 4px;
+        font-size: 14px;
+    }
+    .cart-thumb {
+        width: 32px;
+        height: 32px;
+    }
+}
 
 
+.payment-modal {
+  position: fixed;
+  z-index: 1001;
+  left: 0; top: 0; right: 0; bottom: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.payment-modal-content {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.13);
+  padding: 32px 28px 24px 28px;
+  min-width: 320px;
+  max-width: 95vw;
+  position: relative;
+}
+.payment-modal-content .close {
+  position: absolute;
+  right: 18px;
+  top: 12px;
+  font-size: 1.6rem;
+  color: #888;
+  cursor: pointer;
+}
+.payment-modal-content label {
+  font-weight: 500;
+  margin-bottom: 4px;
+  display: block;
+}
+.payment-modal-content input[type="text"],
+.payment-modal-content input[type="password"] {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 1rem;
+  margin-bottom: 12px;
+}
+.payment-modal-content .form-row {
+  display: flex;
+  gap: 12px;
+}
+.payment-modal-content .btn-primary {
+  background: #ffd700;
+  color: #222;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 12px 0;
+}
+.payment-modal-content .btn-primary:hover {
+  background: #ffe066;
+  color: #111;
+}
+#blurOverlay {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0; top: 0; right: 0; bottom: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.13);
+}
+
+html, body {
+  height: 100%;
+}
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+footer {
+  margin-top: auto;
+}
