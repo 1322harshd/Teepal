@@ -1,255 +1,107 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TeePal - Customize Product</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" type="text/css">
-    <style>
-        /* Additional styles for product page */
-        .product-container {
-            display: flex;
-            gap: 40px;
-            padding: 20px;
-            margin: 20px 0;
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
         }
-        .product-image {
-            flex: 1;
-            text-align: center;
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
         }
-        .product-image img {
-            max-width: 100%;
-            height: auto;
+        return gk_fileData[filename] || "";
         }
-        .product-details {
-            flex: 1;
-        }
-        .product-details h2 {
-            margin-top: 0;
-            font-size: 24px;
-        }
-        .product-details p {
-            margin: 10px 0;
-            font-size: 16px;
-        }
-        .customization-options {
-            margin-top: 20px;
-        }
-        .customization-options label {
-            display: block;
-            margin: 10px 0 5px;
-            font-weight: bold;
-        }
-        .customization-options input[type="text"],
-        .customization-options select {
-            width: 100%;
-            max-width: 300px;
-            padding: 8px;
-            margin-bottom: 10px;
-        }
-        .autosuggest-logo {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: transform 0.3s;
-        }
-        .autosuggest-logo:hover {
-            transform: scale(1.1);
-        }
-        .preview-section {
-            margin-top: 20px;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        .preview-section h3 {
-            margin-top: 0;
-        }
-        .action-buttons {
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
-        }
-        .action-buttons button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .save-customization {
-            background-color: #007bff;
-            color: white;
-        }
-        .add-to-cart {
-            background-color: #28a745;
-            color: white;
-        }
-        .save-for-later {
-            background-color: #ffc107;
-            color: black;
-        }
-        /* Popup styles */
-        .popup {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-        }
-        .popup-content {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 400px;
-            height: 300px;
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <div class="top_bar">
-            <img src="{{ url_for('static', filename='logo.png') }}" alt="logo" class="logo">
-            <img src="{{ url_for('static', filename='user.jpg') }}" alt="user" class="user" onclick="toggleMenu()">
-            <div class="sub_menu_wrap" id="subMenu">
-                <div class="sub_menu">
-                    <div class="user_info">
-                        <img src="{{ url_for('static', filename='user.jpg') }}" alt="user">
-                        <h3>James Aldrino</h3>
-                    </div>
-                    <hr>
-                    <a href="#" class="sub_menu_link">
-                        <img src="{{ url_for('static', filename='profile.png') }}">
-                        <p>Edit Profile</p>
-                        <span>></span>
-                    </a>
-                    <a href="#" class="sub_menu_link">
-                        <img src="{{ url_for('static', filename='setting.png') }}">
-                        <p>Settings & Privacy</p>
-                        <span>></span>
-                    </a>
-                    <a href="#" class="sub_menu_link">
-                        <img src="{{ url_for('static', filename='help.png') }}">
-                        <p>Help & Support</p>
-                        <span>></span>
-                    </a>
-                    <a href="#" class="sub_menu_link">
-                        <img src="{{ url_for('static', filename='logout.png') }}">
-                        <p>Logout</p>
-                        <span>></span>
-                    </a>
-                </div>
+        </script>{% extends "base.html" %}
+{% block title %}TeePal - Customize Product{% endblock %}
+{% block content %}
+<section>
+    <div class="product-container">
+        <div class="product-image">
+            <img src="{{ url_for('static', filename='product-placeholder.png') }}" alt="{{ product.Item }}" id="product-preview">
+            <div class="preview-section">
+                <h3>Live Preview</h3>
+                <p id="preview-text">{{ custom_text if custom_text else "Your custom text will appear here" }}</p>
             </div>
         </div>
-        <nav>
-            <div class="navdiv">
-                <div class="search_bar">
-                    <input type="text" placeholder="Search...">
-                    <i class="fa fa-search"></i>
-                </div>
-                <div class="nav_buttons">
-                    <ul>
-                        <li><a href="{{ url_for('home') }}">Homepage</a></li>
-                        <li><a href="#">Products</a></li>
-                        <li><a href="#">Saved</a></li>
-                        <li><a href="#">Shopping Cart</a></li>
-                        <li><a href="#">Orders</a></li>
-                    </ul>
-                </div>
+        <div class="product-details">
+            <h2>{{ product.Item }}</h2>
+            <p>Brand: {{ product.Brand }}</p>
+            <p>Price: ${{ product.Price }}</p>
+            <div class="customization-options">
+                <form method="POST">
+                    <label for="custom-text">Custom Text:</label>
+                    <input type="text" id="custom-text" name="custom_text" value="{{ custom_text if custom_text else '' }}" oninput="updatePreview()">
+                    <label for="text-color">Text Color:</label>
+                    <select id="text-color" name="text_color" onchange="updatePreview()">
+                        <option value="black">Black</option>
+                        <option value="red">Red</option>
+                        <option value="blue">Blue</option>
+                    </select>
+                    <label for="autosuggest">Autosuggest Designs:</label>
+                    <img src="{{ url_for('static', filename='ai-logo.png') }}" alt="Autosuggest Logo" id="autosuggest-logo" class="autosuggest-logo" onclick="toggleAutosuggest()">
+                </form>
             </div>
-        </nav>
-    </header>
-    <main>
-        <section>
-            <div class="section-title">Customize Your {{ product.name }}</div>
-            <div class="product-container">
-                <!-- Product Image and Preview -->
-                <div class="product-image">
-                    <img src="{{ url_for('static', filename='product-placeholder.png') }}" alt="{{ product.name }}" id="product-preview">
-                    <div class="preview-section">
-                        <h3>Live Preview</h3>
-                        <p id="preview-text">{{ custom_text if custom_text else "Your custom text will appear here" }}</p>
-                    </div>
-                </div>
-                <!-- Product Details and Customization -->
-                <div class="product-details">
-                    <h2>{{ product.name }}</h2>
-                    <p>Type: {{ product.type }}</p>
-                    <p>Color: {{ product.color }}</p>
-                    <p>Price: ${{ product.price }}</p>
-                    <div class="customization-options">
-                        <form method="POST">
-                            <label for="custom-text">Custom Text:</label>
-                            <input type="text" id="custom-text" name="custom_text" value="{{ custom_text if custom_text else '' }}" oninput="updatePreview()">
-
-                            <label for="text-color">Text Color:</label>
-                            <select id="text-color" name="text_color" onchange="updatePreview()">
-                                <option value="black">Black</option>
-                                <option value="red">Red</option>
-                                <option value="blue">Blue</option>
-                            </select>
-
-                            <label for="autosuggest"></label>
-                            <img src="{{ url_for('static', filename='ai-logo.png') }}" alt="Autosuggest Logo" id="autosuggest-logo" class="autosuggest-logo" onclick="toggleAutosuggest()">
-                        </form>
-                    </div>
-                    <div class="action-buttons">
-                        <button type="submit" formmethod="POST" class="save-customization">Save Customization</button>
-                        <button class="add-to-cart" onclick="addToCart()">Add to Cart</button>
-                        <button class="save-for-later" onclick="saveForLater()">Save for Later</button>
-                    </div>
-                </div>
+            <div class="action-buttons">
+                <button type="submit" formmethod="POST" class="save-customization">Save Customization</button>
+                <button class="add-to-cart" onclick="addToCart()">Add to Cart</button>
+                <button class="save-for-later" onclick="saveForLater()">Save for Later</button>
             </div>
-        </section>
-    </main>
-    <footer>
-        Footer
-    </footer>
-    <!-- Popup for Autosuggest -->
-    <div id="autosuggest-popup" class="popup">
-        <div class="popup-content"></div>
+        </div>
     </div>
-    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
-    <script>
-        function updatePreview() {
-            const text = document.getElementById('custom-text').value;
-            const textColor = document.getElementById('text-color').value;
-            const previewText = document.getElementById('preview-text');
-            previewText.innerText = text || "Your custom text will appear here";
-            previewText.style.color = textColor;
+</section>
+<div id="autosuggest-popup" class="popup">
+    <div class="popup-content">
+        <div class="design-window">
+            <h3>Design Your Product</h3>
+        </div>
+    </div>
+</div>
+<script>
+    function updatePreview() {
+        const text = document.getElementById('custom-text').value;
+        const textColor = document.getElementById('text-color').value;
+        const previewText = document.getElementById('preview-text');
+        previewText.innerText = text || "Your custom text will appear here";
+        previewText.style.color = textColor;
+    }
+    function toggleAutosuggest() {
+        const logo = document.getElementById('autosuggest-logo');
+        const currentSrc = logo.src;
+        if (currentSrc.includes('ai-logo.png')) {
+            logo.src = "{{ url_for('static', filename='sphere-logo.png') }}";
+        } else {
+            logo.src = "{{ url_for('static', filename='ai-logo.png') }}";
         }
-
-        function toggleAutosuggest() {
-            const logo = document.getElementById('autosuggest-logo');
-            const currentSrc = logo.src;
-            if (currentSrc.includes('ai-logo.png')) {
-                logo.src = "{{ url_for('static', filename='sphere-logo.png') }}";
-            } else {
-                logo.src = "{{ url_for('static', filename='ai-logo.png') }}";
-            }
-            // Toggle popup
-            const popup = document.getElementById('autosuggest-popup');
-            popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
-        }
-
-        function addToCart() {
-            alert("Added to Cart!");
-            // Add logic to save to cart (e.g., via Flask route)
-        }
-
-        function saveForLater() {
-            alert("Saved for Later!");
-            // Add logic to save for later (e.g., via Flask route)
-        }
-    </script>
-</body>
-</html>
+        const popup = document.getElementById('autosuggest-popup');
+        popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+    }
+    function addToCart() { alert("Added to Cart!"); }
+    function saveForLater() { alert("Saved for Later!"); }
+</script>
+{% endblock %}

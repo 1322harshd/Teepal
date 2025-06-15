@@ -49,3 +49,13 @@ CREATE TABLE OrderDetails (
     Quantity INTEGER NOT NULL,
     PriceAtPurchase DECIMAL(10, 2)
 );
+
+-- Table to store custom requests
+CREATE TABLE CustomRequests (
+    RequestId SERIAL PRIMARY KEY,
+    UserId INTEGER REFERENCES Users(UserId) ON DELETE CASCADE,
+    ProductId INTEGER REFERENCES Products(ProductId),
+    CustomText TEXT,
+    Status VARCHAR(20) DEFAULT 'pending',
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

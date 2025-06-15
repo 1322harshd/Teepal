@@ -1,48 +1,117 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TeePal</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" type="text/css">
-</head>
-<body>
-    <header>
-        <div class="top_bar">
-            <img src="{{ url_for('static', filename='logo.png') }}" alt="logo" class="logo">
-            <img src="{{ url_for('static', filename='user.jpg') }}" alt="user" class="user" onclick="toggleMenu()">
-            <div class="sub_menu_wrap" id="subMenu">
-                <div class="sub_menu">
-                    <div class="user_info">
-                        <img  src="{{ url_for('static', filename='user.jpg') }}" alt="user">
-                        <h3>James Aldrino</h3>
-                    </div>
-                    </a>
-                </div>
-            </div>
-        </div>
-        <nav>
-            <div class="navdiv">
-                <div class="search_bar">
-                </div>
-                <div class="nav_buttons">
-                    <ul>
-                    <li><a href="#">Customization</a></li>
-                    <li><a href="#">Orders</a></li>
-                    <li><a href="#">Inventory</a></li>
-                    <li><a href="#">Users</a></li>
-                    <li><a href="#">Logout</a></li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-           
-        
-      
-    </header>
-    <footer>
-    </footer>
-  <script src="{{ url_for('static', filename='scripts.js') }}"></script>
-</body>
-</html>
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script>{% extends "base.html" %}
+{% block title %}TeePal - Admin Dashboard{% endblock %}
+{% block content %}
+<section class="admin-container">
+    <h2>Admin Dashboard</h2>
+    <h3>Custom Requests</h3>
+    <table class="admin-table">
+        <tr>
+            <th>ID</th>
+            <th>User ID</th>
+            <th>Product ID</th>
+            <th>Custom Text</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+        {% for request in custom_requests %}
+            <tr>
+                <td>{{ request.RequestId }}</td>
+                <td>{{ request.UserId }}</td>
+                <td>{{ request.ProductId }}</td>
+                <td>{{ request.CustomText }}</td>
+                <td>{{ request.Status }}</td>
+                <td>
+                    <a href="{{ url_for('approve_request', request_id=request.RequestId) }}">Approve</a> |
+                    <a href="{{ url_for('reject_request', request_id=request.RequestId) }}">Reject</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    <h3>Orders</h3>
+    <table class="admin-table">
+        <tr>
+            <th>ID</th>
+            <th>User ID</th>
+            <th>Ordered At</th>
+        </tr>
+        {% for order in orders %}
+            <tr>
+                <td>{{ order.OrderId }}</td>
+                <td>{{ order.UserId }}</td>
+                <td>{{ order.OrderedAt }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <h3>Products</h3>
+    <table class="admin-table">
+        <tr>
+            <th>ID</th>
+            <th>Item</th>
+            <th>Brand</th>
+            <th>Price</th>
+        </tr>
+        {% for product in products %}
+            <tr>
+                <td>{{ product.ProductId }}</td>
+                <td>{{ product.Item }}</td>
+                <td>{{ product.Brand }}</td>
+                <td>${{ product.Price }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <h3>Users</h3>
+    <table class="admin-table">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+        </tr>
+        {% for user in users %}
+            <tr>
+                <td>{{ user.UserId }}</td>
+                <td>{{ user.Name }}</td>
+                <td>{{ user.Email }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+</section>
+{% endblock %}

@@ -253,12 +253,15 @@ def forgot_password():
 def add_to_cart(product_id):
     if not session.get('logged_in'):
         return redirect(url_for('login'))
+
     user_id = session['user_id']
     quantity = int(request.form.get('quantity', 1))
+
     with get_db_connection() as conn:
         existing = conn.execute(
             'SELECT * FROM CartItems WHERE UserId = ? AND ProductId = ?', (user_id, product_id)
         ).fetchone()
+
         if existing:
             conn.execute(
                 'UPDATE CartItems SET Quantity = Quantity + ? WHERE UserId = ? AND ProductId = ?',
@@ -270,7 +273,8 @@ def add_to_cart(product_id):
                 (user_id, product_id, quantity)
             )
         conn.commit()
-    return redirect(url_for('shopping_cart'))
+    return redirect(url_for('product', product_id=product_id))
+
 
 @app.route('/save_item/<int:product_id>', methods=['POST'])
 def save_item(product_id):
@@ -288,6 +292,24 @@ def save_item(product_id):
             )
             conn.commit()
     return redirect(url_for('saved_items'))
+
+# Product page route
+@app.route('/product/<int:product_id>', methods=['GET', 'POST'])
+def product(product_id):
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    with get_db_connection() as conn:
+        product = conn.execute('SELECT * FROM Products WHERE ProductId = ?', (product_id,)).fetchone()
+        if not product:
+            return "Product not found", 404
+        custom_text = request.form.get('custom_text', '') if request.method == 'POST' else ''
+        if request.method == 'POST':
+            conn.execute(
+                'INSERT INTO CustomRequests (UserId, ProductId, CustomText, Status) VALUES (?, ?, ?, ?)',
+                (session['user_id'], product_id, custom_text, 'pending')
+            )
+            conn.commit()
+    return render_template('product.html', product=product, custom_text=custom_text)
 
 if __name__ == '__main__':
     app.run(debug=True)

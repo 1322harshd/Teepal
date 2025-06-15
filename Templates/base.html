@@ -60,8 +60,8 @@
                 </div>
                 <div class="nav_buttons">
                     <ul>
-                    <li><a href="/">Homepage</a></li>
-                    <li><a href="#">Products</a></li>
+                    <li><a href="{{ url_for('home') }}">Homepage</a></li>
+                    <li><a href="{{ url_for('product', product_id=1) }}">Products</a></li>
                     <li><a href="/saved_items">Saved</a></li>
                     <li><a href="/shopping_cart">Shopping Cart</a></li>
                     <li><a href="/orders">Orders</a></li>
