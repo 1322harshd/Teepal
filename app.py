@@ -7,6 +7,7 @@ import os
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
+print(os.listdir('static'))
 
 UPLOAD_FOLDER = os.path.join('static', 'users')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -288,6 +289,68 @@ def save_item(product_id):
             )
             conn.commit()
     return redirect(url_for('saved_items'))
+
+# Search route
+@app.route('/search', methods=['GET'])
+def search():
+    query = request.args.get('q', '')
+    with get_db_connection() as conn:
+        products = conn.execute(
+            'SELECT * FROM Products WHERE Item LIKE ? OR Brand LIKE ?',
+            ('%' + query + '%', '%' + query + '%')
+        ).fetchall()
+    return render_template('search_results.html', products=products, query=query)
+
+# Admin dashboard route
+@app.route('/admin')
+def admin_dashboard():
+    if not session.get('logged_in') or session.get('username') != 'admin':  # Simple admin check
+        return redirect(url_for('login'))
+    with get_db_connection() as conn:
+        # Assuming custom requests are stored in a new table (to be added to schema.sql)
+        custom_requests = conn.execute('SELECT * FROM CustomRequests').fetchall()
+        orders = conn.execute('SELECT * FROM Orders').fetchall()
+        products = conn.execute('SELECT * FROM Products').fetchall()
+        users = conn.execute('SELECT * FROM Users').fetchall()
+    return render_template('admin.html', custom_requests=custom_requests, orders=orders, products=products, users=users)
+
+# Admin approve request route
+@app.route('/admin/approve/<int:request_id>')
+def approve_request(request_id):
+    if not session.get('logged_in') or session.get('username') != 'admin':
+        return redirect(url_for('login'))
+    with get_db_connection() as conn:
+        conn.execute('UPDATE CustomRequests SET Status = ? WHERE RequestId = ?', ('approved', request_id))
+        conn.commit()
+    return redirect(url_for('admin_dashboard'))
+
+# Admin reject request route
+@app.route('/admin/reject/<int:request_id>')
+def reject_request(request_id):
+    if not session.get('logged_in') or session.get('username') != 'admin':
+        return redirect(url_for('login'))
+    with get_db_connection() as conn:
+        conn.execute('UPDATE CustomRequests SET Status = ? WHERE RequestId = ?', ('rejected', request_id))
+        conn.commit()
+    return redirect(url_for('admin_dashboard'))
+
+# Product page route
+@app.route('/product/<int:product_id>', methods=['GET', 'POST'])
+def product(product_id):
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    with get_db_connection() as conn:
+        product = conn.execute('SELECT * FROM Products WHERE ProductId = ?', (product_id,)).fetchone()
+        if not product:
+            return "Product not found", 404
+        custom_text = request.form.get('custom_text', '') if request.method == 'POST' else ''
+        if request.method == 'POST':
+            conn.execute(
+                'INSERT INTO CustomRequests (UserId, ProductId, CustomText, Status) VALUES (?, ?, ?, ?)',
+                (session['user_id'], product_id, custom_text, 'pending')
+            )
+            conn.commit()
+    return render_template('product.html', product=product, custom_text=custom_text)
 
 if __name__ == '__main__':
     app.run(debug=True)
