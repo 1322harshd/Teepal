@@ -53,22 +53,25 @@
             {% endif %}
         </div>
         <nav style="font-family: 'Poppins', sans-serif;">
-            <div class="navdiv">
-                <div class="search_bar">
-                    <input type="text" placeholder="Search...">
-                    <i class="fa fa-search"></i>
-                </div>
-                <div class="nav_buttons">
-                    <ul>
-                    <li><a href="{{ url_for('home') }}">Homepage</a></li>
-                    <li><a href="{{ url_for('product', product_id=1) }}">Products</a></li>
-                    <li><a href="/saved_items">Saved</a></li>
-                    <li><a href="/shopping_cart">Shopping Cart</a></li>
-                    <li><a href="/orders">Orders</a></li>
-                    </ul>
-                </div>
+         <div class="navdiv">
+        <form action="{{ url_for('search') }}" method="get" style="margin: 0;">
+            <div class="search_bar" style="position: relative;">
+                <input type="text" id="searchInput" name="q" placeholder="Search..." autocomplete="off">
+                <i class="fa fa-search"></i>
+                 <ul id="suggestions" style="position:absolute; top:100%; left:0; right:0; background:white; list-style:none; padding:0; margin:0; border:1px solid #ccc; z-index:1000;"></ul>
             </div>
-        </nav>
+        </form>
+        <div class="nav_buttons">
+            <ul>
+                <li><a href="{{ url_for('home') }}">Homepage</a></li>
+                <li><a href="{{ url_for('product', product_id=1) }}">Products</a></li>
+                <li><a href="/saved_items">Saved</a></li>
+                <li><a href="/shopping_cart">Shopping Cart</a></li>
+                <li><a href="/orders">Orders</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
            
     </header>
     <main style="flex:1; display:flex; flex-direction:column;">

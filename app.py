@@ -13,7 +13,7 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def get_db_connection():
-    conn = sqlite3.connect('teepal.db')
+    conn = sqlite3.connect('Teepal2.db')
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -310,6 +310,23 @@ def product(product_id):
             )
             conn.commit()
     return render_template('product.html', product=product, custom_text=custom_text)
+
+@app.route('/search')
+def search():
+    query = request.args.get('q', '').strip()
+    products = []
+
+    if query:
+        with get_db_connection() as conn:
+            products = conn.execute(
+                '''
+                SELECT * FROM Products
+                WHERE Item LIKE ? OR Brand LIKE ?
+                ''',
+                (f'%{query}%', f'%{query}%')
+            ).fetchall()
+
+    return render_template('search_results.html', query=query, products=products)
 
 if __name__ == '__main__':
     app.run(debug=True)
