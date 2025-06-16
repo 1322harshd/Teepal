@@ -20,6 +20,14 @@ def get_db_connection():
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+from flask import session
+
+def clear_session_once():
+    if not hasattr(app, 'session_cleared'):
+        session.clear()
+        app.session_cleared = True
+
+app.before_request(clear_session_once)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -381,6 +389,8 @@ def product(product_id):
             )
             conn.commit()
     return render_template('product.html', product=product, custom_text=custom_text)
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
