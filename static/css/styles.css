@@ -260,20 +260,16 @@ nav ul li a:hover{
 /* Blur overlay for user menu */
 .blur-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    backdrop-filter: blur(4px);
-    background: rgba(0,0,0,0.08);
-    z-index: 5;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(255,255,255,0.2); /* Slight white tint for blur */
+    backdrop-filter: blur(6px);        /* Stronger blur for visibility */
+    z-index: 99;                       /* Should be below the menu, above the rest */
+    display: none;
+    transition: all 0.2s;
 }
 .blur-overlay.active {
-    opacity: 1;
-    pointer-events: all;
+    display: block;
 }
 
 /* Site Footer */
@@ -378,17 +374,19 @@ nav ul li a:hover{
    color: #888;
 }
 .sc_1 img{
-    border-radius:24px;
-    height:20%;
-    width:10%;
+    border-radius: 24px;
+    height: 100px;         
+    width: 100px;          
+    object-fit: contain;   
+    background: #fafafa;  
 }
 .sc_1_middle{
     padding-top:0%;
     padding:2%;
 }
 .sc_1_right{
-    margin-left:auto;
-    position:relative;
+    margin-left: auto;
+    position: relative;
     padding-top: 30px;
     padding-right: 40px; 
 }
@@ -432,22 +430,67 @@ nav ul li a:hover{
 .sc_1_right button:hover{
    color:gold;
 }
-/* Position the form exactly like the old a:last-of-type */
-.sc_1_right .save-form {
-    position: absolute;
-    bottom: 5%;
-    right: 50%;
-    margin-left: 8px;
-    width: 38px;
-    height: 38px;
+.sc_1_right .design-btn {
+    font-family: 'Poppins', sans-serif;
+    text-align: left;
+    width: 100%;
+    margin: 5px 0 8px 0;
+    background-color: #989898;
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 8px;
+    font-size: larger;
+    transition: background 0.2s;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.sc_1_right .design-btn:hover {
+    color: gold;
+}
+
+/* Green cart button, like homepage */
+.sc_1_right .cart-btn {
+    width: 100%;
+    margin: 0 0 5px 0;
+    background: #1abc9c;
+    color: #fff;
+    border: none;
+    padding: 8px 0;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: background 0.2s, color 0.2s;
+    gap: 8px;
 }
 
-/* Style the button inside the form same as old a */
+.sc_1_right .cart-btn i {
+    font-size: 20px;
+}
+
+.sc_1_right .cart-btn:hover {
+    background: #16a085;
+    color: #ffd700;
+}
+
+/* Position the form exactly like the old a:last-of-type */
+.sc_1_right .save-form {
+    position: static;
+    margin: 10px 0 0 0; /* space above the heart */
+    width: auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* Style the button as a floating heart */
 .sc_1_right .save-form button {
-    background: #fdeaea;
+    background: #d1a9a9;
     border-radius: 50%;
     width: 38px;
     height: 38px;
@@ -462,13 +505,11 @@ nav ul li a:hover{
     justify-content: center;
 }
 
-/* Hover effect for the button */
 .sc_1_right .save-form button:hover {
     background: #f8d7da;
     transform: scale(1.1);
 }
 
-/* Remove default button focus outline if desired */
 .sc_1_right .save-form button:focus {
     outline: none;
 }
@@ -683,4 +724,85 @@ body {
 }
 footer {
   margin-top: auto;
+}
+
+
+.sc_1_right {
+    margin-left: auto;
+    position: relative;
+    padding-top: 30px;
+    padding-right: 40px;
+}
+
+.sc_1_right .remove-form {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    z-index: 2;
+}
+
+.sc_1_right .remove-form button {
+    background: #989898;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    color: white;
+    font-size: 15px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.sc_1_right .remove-form button:hover {
+    background: gold;
+    color: #222;
+}
+
+
+.sc_1_right {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    height: 100%;
+    min-height: 120px;
+}
+
+.sc_1_right .cart-form {
+    position: static;   
+    margin: 10px 0 0 0; 
+    width: auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.sc_1_right .cart-fab-btn {
+    background: #e0f8f1;
+    color: #1abc9c;
+    border: none;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(26,188,156,0.10);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    z-index: 1;
+    padding: 0;
+}
+
+.sc_1_right .cart-fab-btn:hover {
+    background: #1abc9c;
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(26,188,156,0.18);
 }

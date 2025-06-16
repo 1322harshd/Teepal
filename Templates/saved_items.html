@@ -18,9 +18,17 @@
           <span>${{ product.price }}</span>
         </div>
         <div class="sc_1_right">
-          <a href="#"><i class="fa-solid fa-xmark"></i></a><br>
-          <button onclick="window.location.href='/'">Design</button>
-          <a href="#"><i class="fa-solid fa-shopping-cart" title="Add to Cart"></i></a>
+          <form class="remove-form" action="{{ url_for('remove_saved_item', product_id=product.ProductId) }}" method="POST">
+            <button type="submit" title="Remove">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </form>
+          <button class="design-btn" onclick="window.location.href='/'">Design</button>
+          <form class="cart-form" action="{{ url_for('add_to_cart', product_id=product.ProductId) }}" method="POST">
+            <button type="submit" class="cart-fab-btn" title="Add to Cart">
+              <i class="fa-solid fa-shopping-cart"></i>
+            </button>
+          </form>
         </div>
       </div>
     {% endfor %}

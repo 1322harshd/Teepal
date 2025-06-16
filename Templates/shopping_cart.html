@@ -105,13 +105,18 @@
         <span>× ${{ product.price }} = $<span id="total_{{ loop.index0 }}">{{ product.price }}</span></span>
       </div>
       <div class="sc_1_right">
-        <a href="#"><i class="fa-solid fa-xmark"></i></a><br>
+        <form class="remove-form" action="{{ url_for('remove_item', product_id=product.ProductId) }}" method="POST">
+          <button type="submit" title="Remove">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </form><br>
         <button onclick="window.location.href='/'">Design</button>
-       <form class="save-form" action="{{ url_for('save_item', product_id=product.ProductId) }}" method="POST" style="display:inline;">
+        <form class="save-form" action="{{ url_for('save_item', product_id=product.ProductId) }}" method="POST" style="display:inline;">
           <button type="submit" title="Save" style="background:none; border:none; padding:0; cursor:pointer;">
             <i class="fa-solid fa-heart"></i>
           </button>
-        </form></div>
+        </form>
+      </div>
     </div>
   {% endfor %}
 </div>
