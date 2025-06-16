@@ -236,7 +236,7 @@ nav ul li a:hover{
     font-size: larger;
 }
 
-.to_1-footer a {
+.to_1-footer form button {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -253,7 +253,7 @@ nav ul li a:hover{
     text-decoration: none;
 }
 
-.to_1-footer a:hover {
+.to_1-footer form button:hover {
     background: #d1f2eb;
 }
 
@@ -432,31 +432,47 @@ nav ul li a:hover{
 .sc_1_right button:hover{
    color:gold;
 }
-.sc_1_right a:last-of-type {
-    position:absolute;
-    bottom:5%;
-    right:50%;
+/* Position the form exactly like the old a:last-of-type */
+.sc_1_right .save-form {
+    position: absolute;
+    bottom: 5%;
+    right: 50%;
+    margin-left: 8px;
+    width: 38px;
+    height: 38px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #fdeaea;           
+}
+
+/* Style the button inside the form same as old a */
+.sc_1_right .save-form button {
+    background: #fdeaea;
     border-radius: 50%;
     width: 38px;
     height: 38px;
-    color: #e74c3c;                
+    color: #e74c3c;
     font-size: 22px;
     border: none;
     cursor: pointer;
     transition: background 0.2s, transform 0.2s;
-    margin-left: 8px;
-    text-decoration: none;
-
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.sc_1_right a:last-of-type:hover {
-    background: #f8d7da;          
-    transform: scale(1.1);         
+/* Hover effect for the button */
+.sc_1_right .save-form button:hover {
+    background: #f8d7da;
+    transform: scale(1.1);
 }
+
+/* Remove default button focus outline if desired */
+.sc_1_right .save-form button:focus {
+    outline: none;
+}
+
 
 
 .sc_1_middle input[type="number"] {

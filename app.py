@@ -9,7 +9,7 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 print(os.listdir('static'))
 
-UPLOAD_FOLDER = os.path.join('static', 'users')
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'users')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -82,7 +82,10 @@ def register():
                     error = "Username already taken."
                 else:
                     filename = secure_filename(f"{username}_{file.filename}")
+                   
                     file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+                    
                     hashed_password = generate_password_hash(password)
                     conn.execute(
                         'INSERT INTO Users (Name, DisplayName, Email, Password, Image, SecurityQuestion, SecurityAnswer) VALUES (?, ?, ?, ?, ?, ?, ?)',
@@ -289,6 +292,33 @@ def save_item(product_id):
             )
             conn.commit()
     return redirect(url_for('saved_items'))
+@app.route('/remove_item/<int:product_id>', methods=['POST'])
+def remove_item(product_id):
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    user_id = session['user_id']
+    with get_db_connection() as conn:
+        # Remove the product from CartItems for this user
+        conn.execute(
+            'DELETE FROM CartItems WHERE UserId = ? AND ProductId = ?', (user_id, product_id)
+        )
+        conn.commit()
+    return redirect(url_for('shopping_cart'))
+@app.route('/remove_saved_item/<int:product_id>', methods=['POST'])
+def remove_saved_item(product_id):
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    user_id = session['user_id']
+    with get_db_connection() as conn:
+        conn.execute(
+            'DELETE FROM SavedItems WHERE UserId = ? AND ProductId = ?', (user_id, product_id)
+        )
+        conn.commit()
+    return redirect(url_for('saved_items'))
+
+
+
+
 
 # Search route
 @app.route('/search', methods=['GET'])
