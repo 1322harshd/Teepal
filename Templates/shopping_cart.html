@@ -35,13 +35,13 @@
         <input type="text" id="cardNumber" maxlength="19" placeholder="1234 5678 9012 3456" required>
       </div>
       <div class="form-row">
-        <div class="form-group" style="flex:1; margin-right:8px;">
+        <div class="form-group">
           <label for="expiry">Expiry</label>
-          <input type="text" id="expiry" maxlength="5" placeholder="MM/YY" required>
+          <input type="text" id="expiry" maxlength="5" placeholder="MM/YY" required class="payment-input">
         </div>
-        <div class="form-group" style="flex:1;">
+        <div class="form-group">
           <label for="cvv">CVV</label>
-          <input type="password" id="cvv" maxlength="4" placeholder="123" required>
+          <input type="password" id="cvv" maxlength="4" placeholder="123" required class="payment-input">
         </div>
       </div>
       <button type="submit" class="btn-primary" style="width:100%;margin-top:18px;">Pay $<span id="payAmount">0.00</span></button>

@@ -687,7 +687,7 @@ nav ul li a:hover{
 }
 .payment-modal-content .form-row {
   display: flex;
-  gap: 12px;
+  gap: 18px;
 }
 .payment-modal-content .btn-primary {
   background: #ffd700;
@@ -805,4 +805,13 @@ footer {
     background: #1abc9c;
     color: #fff;
     box-shadow: 0 4px 16px rgba(26,188,156,0.18);
+}
+
+.payment-input {
+  width: 80px;
+  border: 2px solid #1abc9c;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 1rem;
+  box-sizing: border-box;
 }

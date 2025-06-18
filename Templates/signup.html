@@ -103,13 +103,19 @@
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" required>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="position:relative;">
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" required minlength="6">
+                <button type="button" onclick="togglePassword('password', this)" style="position:absolute; right:10px; top:34px; background:none; border:none; cursor:pointer; font-size:0.95em; color:#888;">
+                    Show
+                </button>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="position:relative;">
                 <label for="confirm_password">Confirm Password</label>
                 <input type="password" id="confirm_password" name="confirm_password" required minlength="6">
+                <button type="button" onclick="togglePassword('confirm_password', this)" style="position:absolute; right:10px; top:34px; background:none; border:none; cursor:pointer; font-size:0.95em; color:#888;">
+                    Show
+                </button>
             </div>
             <div class="form-group">
                 <label for="security_question">Security Question</label>
@@ -149,6 +155,16 @@
                 alert('Passwords do not match!');
             }
         });
+
+        // Toggle password visibility
+        function togglePassword(fieldId, toggleBtn) {
+            const field = document.getElementById(fieldId);
+            const type = field.getAttribute('type') === 'password' ? 'text' : 'password';
+            field.setAttribute('type', type);
+            toggleBtn.textContent = type === 'password' ? 'Show' : 'Hide';
+        }
+
+        
     </script>
 </body>
 </html>
