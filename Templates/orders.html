@@ -18,7 +18,9 @@
           <span>Qty: {{ product.Quantity }}</span><br>
           <span>Price: ${{ product.PriceAtPurchase }}</span>
           <div style="margin-top:8px; color:#1abc9c; font-size:15px;">
-            Ordered At: {{ product.OrderedAt }}
+            Ordered At: {{ product.OrderedAt }}<br>
+            <strong>Status:</strong> {{ product.Status }}<br>
+            <strong>Arrival Date:</strong> {{ product.ArrivalDate }}
           </div>
         </div>
         <div class="sc_1_right">

@@ -121,6 +121,7 @@
   {% endfor %}
 </div>
 
+
 <div id="blurOverlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.2); z-index:1000;"></div>
 
 <script>
@@ -202,7 +203,9 @@
   function submitPayment(e) {
     e.preventDefault();
     document.getElementById('paymentModal').style.display = 'none';
-    document.getElementById('paymentSuccess').style.display = 'flex';
+    document.getElementById('blurOverlay').style.display = 'none';
+    // Automatically submit the order after payment
+    document.getElementById('checkoutForm').submit();
     return false;
   }
 
@@ -212,6 +215,8 @@
     updateTableGrandTotal();
   };
 </script>
+
+<form id="checkoutForm" action="{{ url_for('checkout') }}" method="POST" style="display:none;"></form>
 
 {% endif %}
 {% endblock %}
