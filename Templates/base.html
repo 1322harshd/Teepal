@@ -10,19 +10,19 @@
 
 </head>
 <body>
-    <div class="blur-overlay" id="blurOverlay"></div>
+     <div class="blur-overlay" id="blurOverlay"></div><!--blur overlay when user menu opened -->
     <header>
         <div class="top_bar">
-            <img src="{{ url_for('static', filename='logos/logo.png') }}" alt="logo" class="logo">
-            {% if session.get('logged_in') %}
-                <img src="{{ url_for('static', filename='users/' ~ session.get('user_image', 'user.jpg')) }}" alt="user" class="user" onclick="toggleMenu()">
-                <div class="sub_menu_wrap" id="subMenu">
+           <img src="{{ url_for('static', filename='logos/logo.png') }}" alt="logo" class="logo">  <!--application logo -->
+            {% if session.get('logged_in') %}<!-- jinja if condition for user menu for options if user logged in -->
+                <img src="{{ url_for('static', filename='users/' ~ session.get('user_image', 'user.jpg')) }}" alt="user" class="user" onclick="toggleMenu()"><!-- user image with js function to open user menu-->
+                <div class="sub_menu_wrap" id="subMenu"><!-- div container for user menu links-->
                     <div class="sub_menu">
-                        <div class="user_info">
-                            <img src="{{ url_for('static', filename='users/' ~ session.get('user_image', 'user.jpg')) }}" alt="user">
-                            <h3>{{ session.get('display_name', session.get('username', 'User')) }}</h3>
+                        <div class="user_info"><!-- div container for image and name of the current user in the drop down box -->
+                            <img src="{{ url_for('static', filename='users/' ~ session.get('user_image', 'user.jpg')) }}" alt="user"><!-- user image-->
+                            <h3>{{ session.get('display_name', session.get('username', 'User')) }}</h3><!-- username-->
                         </div>
-                        <hr>
+                        <hr><!-- option links for logged in user-->
                         <a href="#" class="sub_menu_link">
                             <img src="{{ url_for('static', filename='logos/profile.png') }}">
                             <p>Edit Profile</p>
@@ -45,20 +45,20 @@
                         </a>
                     </div>
                 </div>
-            {% else %}
+            {% else %}<!-- else condition if user is not logged in -->
                 <div class="auth-links" style="margin-left:auto; margin-right:2%; display:flex; gap:16px; align-items:center;">
-                    <a href="{{ url_for('login') }}" class="login-btn">Login</a>
-                    <a href="{{ url_for('register') }}" class="signup-btn">Sign Up</a>
+                    <a href="{{ url_for('login') }}" class="login-btn">Login</a><!-- login button for login page-->
+                    <a href="{{ url_for('register') }}" class="signup-btn">Sign Up</a><!-- signup button for signup page-->
                 </div>
-            {% endif %}
+            {% endif %}<!-- end if condition-->
         </div>
-        <nav style="font-family: 'Poppins', sans-serif;">
+        <nav style="font-family: 'Poppins', sans-serif;"><!-- nav tag for navigation bar-->
             <div class="navdiv">
-                <div class="search_bar">
+                <div class="search_bar"><!-- div container for search bar-->
                     <input type="text" placeholder="Search...">
                     <i class="fa fa-search"></i>
                 </div>
-                <div class="nav_buttons">
+                <div class="nav_buttons"><!-- div container for navigation buttons-->
                     <ul>
                     <li><a href="/">Homepage</a></li>
                     <li><a href="#">Products</a></li>
@@ -72,20 +72,20 @@
            
     </header>
     <main style="flex:1; display:flex; flex-direction:column;">
-        {% block content %}{% endblock %}
+        {% block content %}{% endblock %}<!-- using template block for reusing the header and footer for all pages-->
     </main>
-   <footer class="site-footer">
+   <footer class="site-footer"><!-- foooter tag for footer in the webpage-->
         <div class="footer-content">
             <div class="footer-logo-social">
-                <img src="{{ url_for('static', filename='logos/logo.png') }}" alt="logo" class="footer-logo">
-                <div class="footer-social">
+                <img src="{{ url_for('static', filename='logos/logo.png') }}" alt="logo" class="footer-logo"><!--application logo -->
+                <div class="footer-social"><!-- links to social media handles-->
                     <a href="https://facebook.com" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
                     <a href="https://twitter.com" target="_blank" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
                     <a href="https://instagram.com" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
                     <a href="https://linkedin.com" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
                 </div>
             </div>
-            <div class="footer-links">
+            <div class="footer-links"><!-- essential links to application information-->
                 <a href="#">About Us</a>
                 <a href="#">Contact</a>
                 <a href="#">Privacy Policy</a>
@@ -93,16 +93,44 @@
                 <a href="#">Careers</a>
                 <a href="#">Support</a>
             </div>
-            <div class="footer-contact">
+            <div class="footer-contact"><!-- contact details links -->
                 <p><i class="fas fa-envelope"></i> support@teepal.com</p>
                 <p><i class="fas fa-phone"></i> +1 234 567 8901</p>
             </div>
         </div>
-        <div class="footer-bottom">
+        <div class="footer-bottom"><!-- info-->
             <p>&copy; 2025 TeePal. All rights reserved.</p>
         </div>
     </footer>
-    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+    <script >
+        let subMenu = document.getElementById("subMenu");
+let blurOverlay = document.getElementById("blurOverlay");
+let userImg = document.querySelector(".user");
+
+function toggleMenu() {
+    subMenu.classList.toggle("open_menu");
+    blurOverlay.classList.toggle("active");
+}
+
+// Close menu when clicking the overlay
+blurOverlay.addEventListener("click", function() {
+    subMenu.classList.remove("open_menu");
+    blurOverlay.classList.remove("active");
+});
+
+// Close menu when clicking anywhere outside the menu and user image
+document.addEventListener("mousedown", function(event) {
+    if (
+        subMenu.classList.contains("open_menu") &&
+        !subMenu.contains(event.target) &&
+        !userImg.contains(event.target)
+    ) {
+        subMenu.classList.remove("open_menu");
+        blurOverlay.classList.remove("active");
+    }
+});
+
+    </script>
 </body>
 </html>
 

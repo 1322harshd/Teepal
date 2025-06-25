@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
-print(os.listdir('static'))
+# print(os.listdir('static'))
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'users')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}

@@ -1,30 +1,25 @@
-{% extends "base.html" %}
+{% extends "base.html" %}<!-- this file extends from base.html-->
 {% block content %} 
 <h2>Shopping Cart</h2>
 
 <div id="saved_items" class="lists" style="flex:1; display:flex; flex-direction:column; justify-content:center;">
-  {% if products|length == 0 %}
+  {% if products|length == 0 %}<!-- if condition for showing empty list message-->
     <div class="empty-message" style="text-align:center; color:#888;">
       <i class="fa-solid fa-box-open" style="font-size:2.5rem; margin-bottom:10px;"></i><br>
       No items here yet.<br>
-      <a href="{{ url_for('home') }}" class="btn-primary" style="margin-top:18px;">Go Shopping</a>
+      <a href="{{ url_for('home') }}" class="btn-primary" style="margin-top:18px;">Go Shopping</a><!-- go shopping link to redirect customers to products page-->
     </div>
-  {% else %}
-    <!-- your list items -->
-  {% endif %}
-</div>
-
-{% if products|length > 0 %}
-<div class="order-summary-card" id="orderSummary">
+  {% else %}<!-- else condition if lists have products in it -->
+   <div class="order-summary-card" id="orderSummary">
   <h3>Order Summary</h3>
   <div>
     <span>Total Items: <span id="summaryTotalItems">0</span></span>
     <span style="margin-left: 30px;">Total Price: $<span id="summaryTotalPrice">0.00</span></span>
   </div>
-  <button class="payment-btn" onclick="openPaymentPopup()">Proceed to Payment</button>
+  <button class="payment-btn" onclick="openPaymentPopup()">Proceed to Payment</button><!-- payment button with js function to trigger payment functionality-->
 </div>
 
-<!-- Payment Popup Modal -->
+<!-- payment popup modal -->
 <div id="paymentModal" class="payment-modal" style="display:none;">
   <div class="payment-modal-content">
     <span class="close" onclick="closePaymentPopup()">&times;</span>
@@ -56,7 +51,7 @@
   </div>
 </div>
 
-<!-- Cart Details Table -->
+<!-- summary table for cart items -->
 <div class="cart-details-table">
   <table>
     <thead>
@@ -69,7 +64,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for product in products %}
+      {% for product in products %}<!-- for loop for iterating over information in tabular format-->
       <tr>
         <td>
           <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.item }}" class="cart-thumb">
@@ -78,16 +73,16 @@
         <td>{{ product.brand }}</td>
         <td>${{ product.price }}</td>
         <td>
-          <input type="number" name="quantity" id="table_quantity_{{ loop.index0 }}" value="1" min="1" onchange="updateTableTotal({{ loop.index0 }}, {{ product.price|float }})">
+          <input type="number" name="quantity" id="table_quantity_{{ loop.index0 }}" value="1" min="1" onchange="updateTableTotal({ loop,index0 }, productPrices[{ loop,index0 }])"><!--dynamic quantity input-->
         </td>
-        <td>$<span id="table_total_{{ loop.index0 }}">{{ product.price }}</span></td>
+        <td>$<span id="table_total_{{ loop.index0 }}">{{ product.price }}</span></td><!-- dynamic subtotal price according to quantity of items-->
       </tr>
       {% endfor %}
     </tbody>
     <tfoot>
       <tr>
         <td colspan="4" style="text-align:right;font-weight:bold;">Total:</td>
-        <td style="font-weight:bold;">$<span id="table_grand_total">0.00</span></td>
+        <td style="font-weight:bold;">$<span id="table_grand_total">0.00</span></td><!--  dynamic total price -->
       </tr>
     </tfoot>
   </table>
@@ -101,7 +96,7 @@
         <span>{{ product.brand }}</span>
         <h5>{{ product.item }}</h5>
         <label class="quantity" for="quantity">Quantity:</label>
-        <input type="number" name="quantity" id="quantity_{{ loop.index0 }}" value="1" min="1" onchange="updateTotal({{ loop.index0 }}, {{ product.price|float }})">
+        <input type="number" name="quantity" id="quantity_{{ loop.index0 }}" value="1" min="1" onchange="updateTotal({ loop,index0 }, productPrices[{ loop,index0 }])">
         <span>× ${{ product.price }} = $<span id="total_{{ loop.index0 }}">{{ product.price }}</span></span>
       </div>
       <div class="sc_1_right">
@@ -121,16 +116,10 @@
   {% endfor %}
 </div>
 
-
 <div id="blurOverlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.2); z-index:1000;"></div>
 
 <script>
-  // Product prices from template context
-  const productPrices = [
-    {% for product in products %}
-      {{ product.price }}{% if not loop.last %},{% endif %}
-    {% endfor %}
-  ];
+  const productPrices = JSON.parse('{{ products | map(attribute="price") | list | tojson | safe }}');
 
   function updateTotal(index, price) {
     const qty = document.getElementById('quantity_' + index).value;
@@ -153,7 +142,6 @@
     document.getElementById('payAmount').textContent = totalPrice.toFixed(2);
   }
 
-  // Table logic
   function updateTableTotal(index, price) {
     const qty = document.getElementById('table_quantity_' + index).value;
     document.getElementById('table_total_' + index).textContent = (qty * price).toFixed(2);
@@ -171,7 +159,6 @@
     document.getElementById('table_grand_total').textContent = grandTotal.toFixed(2);
   }
 
-  // Sync table and card quantities
   function updateCartFromTable() {
     for (let i = 0; i < productPrices.length; i++) {
       const tableQty = document.getElementById('table_quantity_' + i).value;
@@ -180,6 +167,7 @@
     }
     updateOrderSummary();
   }
+
   function updateTableFromCart() {
     for (let i = 0; i < productPrices.length; i++) {
       const cartQty = document.getElementById('quantity_' + i).value;
@@ -189,7 +177,6 @@
     updateTableGrandTotal();
   }
 
-  // Payment popup logic
   function openPaymentPopup() {
     document.getElementById('paymentModal').style.display = 'flex';
     document.getElementById('blurOverlay').style.display = 'block';
@@ -204,12 +191,10 @@
     e.preventDefault();
     document.getElementById('paymentModal').style.display = 'none';
     document.getElementById('blurOverlay').style.display = 'none';
-    // Automatically submit the order after payment
     document.getElementById('checkoutForm').submit();
     return false;
   }
 
-  // Initialize on page load
   window.onload = function() {
     updateOrderSummary();
     updateTableGrandTotal();
@@ -218,5 +203,6 @@
 
 <form id="checkoutForm" action="{{ url_for('checkout') }}" method="POST" style="display:none;"></form>
 
-{% endif %}
+  {% endif %}
+</div>
 {% endblock %}
