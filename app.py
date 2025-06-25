@@ -4,21 +4,31 @@ from werkzeug.utils import secure_filename
 import sqlite3
 import re
 import os
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
+print(os.listdir('static'))
 
-UPLOAD_FOLDER = os.path.join('static', 'users')
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'users')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def get_db_connection():
-    conn = sqlite3.connect('Teepal2.db')
+    conn = sqlite3.connect('teepal.db')
     conn.row_factory = sqlite3.Row
     return conn
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+from flask import session
+
+def clear_session_once():
+    if not hasattr(app, 'session_cleared'):
+        session.clear()
+        app.session_cleared = True
+
+app.before_request(clear_session_once)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -81,7 +91,10 @@ def register():
                     error = "Username already taken."
                 else:
                     filename = secure_filename(f"{username}_{file.filename}")
+                   
                     file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+                    
                     hashed_password = generate_password_hash(password)
                     conn.execute(
                         'INSERT INTO Users (Name, DisplayName, Email, Password, Image, SecurityQuestion, SecurityAnswer) VALUES (?, ?, ?, ?, ?, ?, ?)',
@@ -94,7 +107,7 @@ def register():
 @app.route('/')
 def home():
     with get_db_connection() as conn:
-        # Trending: top 3 most ordered products
+      
         trending_orders = conn.execute(
             '''
             SELECT Products.*, SUM(OrderDetails.Quantity) as total_ordered
@@ -106,7 +119,7 @@ def home():
             '''
         ).fetchall()
 
-        # Recent: 3 most recently ordered products
+   
         recent_orders = conn.execute(
             '''
             SELECT Products.*, MAX(Orders.OrderedAt) as last_ordered
@@ -174,14 +187,13 @@ def orders():
     user_id = session['user_id']
     with get_db_connection() as conn:
         orders = conn.execute(
-            '''
-            SELECT Products.*, Orders.OrderId, Orders.OrderedAt, OrderDetails.Quantity, OrderDetails.PriceAtPurchase
-            FROM Orders
-            JOIN OrderDetails ON Orders.OrderId = OrderDetails.OrderId
-            JOIN Products ON OrderDetails.ProductId = Products.ProductId
-            WHERE Orders.UserId = ?
-            ORDER BY Orders.OrderedAt DESC
-            ''', (user_id,)
+            '''SELECT Orders.OrderId, Orders.OrderedAt, Orders.ArrivalDate, Orders.Status, 
+                      Products.Brand, Products.Item, Products.Image, OrderDetails.Quantity, OrderDetails.PriceAtPurchase
+               FROM Orders
+               JOIN OrderDetails ON Orders.OrderId = OrderDetails.OrderId
+               JOIN Products ON OrderDetails.ProductId = Products.ProductId
+               WHERE Orders.UserId = ?
+               ORDER BY Orders.OrderedAt DESC''', (user_id,)
         ).fetchall()
     return render_template('orders.html', products=orders)
 
@@ -200,7 +212,7 @@ def forgot_password():
             if not user:
                 message = "If this email is registered, a password reset option will appear."
             elif not security_answer:
-                # Show security question
+             
                 q_map = {
                     "pet": "What is the name of your first pet?",
                     "school": "What is the name of your elementary school?",
@@ -211,7 +223,7 @@ def forgot_password():
                 security_question = q_map.get(user['SecurityQuestion'], "Security Question")
                 return render_template('forgot_password.html', security_question=security_question, email=email)
             else:
-                # Check answer and reset password
+               
                 if security_answer.strip().lower() != user['SecurityAnswer'].strip().lower():
                     message = "Incorrect answer to the security question."
                     security_question = {
@@ -253,28 +265,25 @@ def forgot_password():
 def add_to_cart(product_id):
     if not session.get('logged_in'):
         return redirect(url_for('login'))
-
     user_id = session['user_id']
-    quantity = int(request.form.get('quantity', 1))
-
     with get_db_connection() as conn:
         existing = conn.execute(
             'SELECT * FROM CartItems WHERE UserId = ? AND ProductId = ?', (user_id, product_id)
         ).fetchone()
-
         if existing:
+            # Always increment by 1 if already exists
             conn.execute(
-                'UPDATE CartItems SET Quantity = Quantity + ? WHERE UserId = ? AND ProductId = ?',
-                (quantity, user_id, product_id)
+                'UPDATE CartItems SET Quantity = Quantity + 1 WHERE UserId = ? AND ProductId = ?',
+                (user_id, product_id)
             )
         else:
+            # Add with quantity 1 if not exists
             conn.execute(
                 'INSERT INTO CartItems (UserId, ProductId, Quantity) VALUES (?, ?, ?)',
-                (user_id, product_id, quantity)
+                (user_id, product_id, 1)
             )
         conn.commit()
-    return redirect(url_for('product', product_id=product_id))
-
+    return redirect(url_for('shopping_cart'))
 
 @app.route('/save_item/<int:product_id>', methods=['POST'])
 def save_item(product_id):
@@ -292,24 +301,33 @@ def save_item(product_id):
             )
             conn.commit()
     return redirect(url_for('saved_items'))
-
-# Product page route
-@app.route('/product/<int:product_id>', methods=['GET', 'POST'])
-def product(product_id):
+@app.route('/remove_item/<int:product_id>', methods=['POST'])
+def remove_item(product_id):
     if not session.get('logged_in'):
         return redirect(url_for('login'))
+    user_id = session['user_id']
     with get_db_connection() as conn:
-        product = conn.execute('SELECT * FROM Products WHERE ProductId = ?', (product_id,)).fetchone()
-        if not product:
-            return "Product not found", 404
-        custom_text = request.form.get('custom_text', '') if request.method == 'POST' else ''
-        if request.method == 'POST':
-            conn.execute(
-                'INSERT INTO CustomRequests (UserId, ProductId, CustomText, Status) VALUES (?, ?, ?, ?)',
-                (session['user_id'], product_id, custom_text, 'pending')
-            )
-            conn.commit()
-    return render_template('product.html', product=product, custom_text=custom_text)
+     
+        conn.execute(
+            'DELETE FROM CartItems WHERE UserId = ? AND ProductId = ?', (user_id, product_id)
+        )
+        conn.commit()
+    return redirect(url_for('shopping_cart'))
+@app.route('/remove_saved_item/<int:product_id>', methods=['POST'])
+def remove_saved_item(product_id):
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    user_id = session['user_id']
+    with get_db_connection() as conn:
+        conn.execute(
+            'DELETE FROM SavedItems WHERE UserId = ? AND ProductId = ?', (user_id, product_id)
+        )
+        conn.commit()
+    return redirect(url_for('saved_items'))
+
+
+
+
 
 @app.route('/search')
 def search():
@@ -327,6 +345,94 @@ def search():
             ).fetchall()
 
     return render_template('search_results.html', query=query, products=products)
+
+
+@app.route('/admin')
+def admin_dashboard():
+    if not session.get('logged_in') or session.get('username') != 'admin':  
+        return redirect(url_for('login'))
+    with get_db_connection() as conn:
+
+        custom_requests = conn.execute('SELECT * FROM CustomRequests').fetchall()
+        orders = conn.execute('SELECT * FROM Orders').fetchall()
+        products = conn.execute('SELECT * FROM Products').fetchall()
+        users = conn.execute('SELECT * FROM Users').fetchall()
+    return render_template('admin.html', custom_requests=custom_requests, orders=orders, products=products, users=users)
+
+
+@app.route('/admin/approve/<int:request_id>')
+def approve_request(request_id):
+    if not session.get('logged_in') or session.get('username') != 'admin':
+        return redirect(url_for('login'))
+    with get_db_connection() as conn:
+        conn.execute('UPDATE CustomRequests SET Status = ? WHERE RequestId = ?', ('approved', request_id))
+        conn.commit()
+    return redirect(url_for('admin_dashboard'))
+
+
+@app.route('/admin/reject/<int:request_id>')
+def reject_request(request_id):
+    if not session.get('logged_in') or session.get('username') != 'admin':
+        return redirect(url_for('login'))
+    with get_db_connection() as conn:
+        conn.execute('UPDATE CustomRequests SET Status = ? WHERE RequestId = ?', ('rejected', request_id))
+        conn.commit()
+    return redirect(url_for('admin_dashboard'))
+
+
+@app.route('/product/<int:product_id>', methods=['GET', 'POST'])
+def product(product_id):
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    with get_db_connection() as conn:
+        product = conn.execute('SELECT * FROM Products WHERE ProductId = ?', (product_id,)).fetchone()
+        if not product:
+            return "Product not found", 404
+        custom_text = request.form.get('custom_text', '') if request.method == 'POST' else ''
+        if request.method == 'POST':
+            conn.execute(
+                'INSERT INTO CustomRequests (UserId, ProductId, CustomText, Status) VALUES (?, ?, ?, ?)',
+                (session['user_id'], product_id, custom_text, 'pending')
+            )
+            conn.commit()
+    return render_template('product.html', product=product, custom_text=custom_text)
+
+@app.route('/checkout', methods=['POST'])
+def checkout():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    user_id = session['user_id']
+    with get_db_connection() as conn:
+        cart_items = conn.execute(
+            '''SELECT Products.ProductId, Products.Price, CartItems.Quantity 
+               FROM CartItems 
+               JOIN Products ON CartItems.ProductId = Products.ProductId 
+               WHERE CartItems.UserId = ?''', (user_id,)
+        ).fetchall()
+        if not cart_items:
+            return redirect(url_for('shopping_cart'))
+
+        ordered_at = datetime.now()
+        arrival_date = (ordered_at + timedelta(days=5)).strftime('%Y-%m-%d')
+        status = 'Arriving'
+
+        conn.execute(
+            'INSERT INTO Orders (UserId, OrderedAt, ArrivalDate, Status) VALUES (?, ?, ?, ?)',
+            (user_id, ordered_at, arrival_date, status)
+        )
+        order_id = conn.execute('SELECT last_insert_rowid()').fetchone()[0]
+
+        for item in cart_items:
+            conn.execute(
+                'INSERT INTO OrderDetails (OrderId, ProductId, Quantity, PriceAtPurchase) VALUES (?, ?, ?, ?)',
+                (order_id, item['ProductId'], item['Quantity'], item['Price'])
+            )
+        conn.execute('DELETE FROM CartItems WHERE UserId = ?', (user_id,))
+        conn.commit()
+
+    return render_template('order_confirmation.html', arrival_date=arrival_date)
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
