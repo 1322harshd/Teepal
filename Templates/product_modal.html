@@ -1,0 +1,149 @@
+<div id="productModal" class="modal-overlay" style="display:none;">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeProductModal()">&times;</span>
+        <div class="modal-body">
+            <div class="modal-image">
+                <img id="modalProductImg" src="" alt="Product Image">
+            </div>
+            <div class="modal-details">
+                <h2 id="modalProductName"></h2>
+                <p id="modalProductBrand"></p>
+                <p id="modalProductPrice"></p>
+                <div class="modal-actions">
+                    <label for="modalProductSize" style="margin-bottom:4px;">Select Size:</label>
+                    <select id="modalProductSize" name="size" style="margin-bottom:10px;">
+                        <option value="S">Small</option>
+                        <option value="M" selected>Medium</option>
+                        <option value="L">Large</option>
+                        <option value="XL">X-Large</option>
+                    </select>
+                    <form id="modalAddToCartForm" method="POST" style="display:inline;">
+                        <input type="hidden" name="product_id" id="modalProductId">
+                        <input type="hidden" name="size" id="modalCartSize">
+                        <button type="submit" class="modal-btn add-cart"><i class="fa fa-shopping-cart"></i> Add to Cart</button>
+                    </form>
+                    <form id="modalSaveForm" method="POST" style="display:inline;">
+                        <input type="hidden" name="size" id="modalSaveSize">
+                        <button type="submit" class="modal-btn save-btn"><i class="fa fa-heart"></i> Save</button>
+                    </form>
+                    <button class="modal-btn share-btn" onclick="shareProductModal()"><i class="fa fa-share"></i> Share</button>
+                    <a class="modal-btn design-btn" id="modalDesignLink"><i class="fa fa-paint-brush"></i> Design</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="modalFeedback" class="modal-feedback" style="display:none;"></div>
+<style>
+/* Modal Styles */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.35); z-index: 10000; display: flex; align-items: center; justify-content: center;
+}
+.modal-content {
+    background: #fff; border-radius: 18px; box-shadow: 0 8px 32px #0003;
+    width: 480px; max-width: 96vw; padding: 0; position: relative; animation: fadeIn 0.2s;
+}
+.close-modal {
+    position: absolute; top: 18px; right: 24px; font-size: 2em; color: #888; cursor: pointer; z-index: 2;
+}
+.modal-body {
+    display: flex; gap: 24px; padding: 32px 32px 24px 32px; align-items: flex-start;
+}
+.modal-image img {
+    width: 140px; height: 140px; object-fit: contain; border-radius: 12px; background: #f7f7f7;
+}
+.modal-details {
+    flex: 1; display: flex; flex-direction: column; gap: 8px;
+}
+.modal-details h2 { margin: 0 0 6px 0; font-size: 1.3em; font-weight: 700; color: #222; }
+.modal-details p { margin: 0; color: #888; font-size: 1em; }
+.modal-actions {
+    margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap;
+}
+.modal-btn {
+    border: none; border-radius: 6px; padding: 8px 14px; font-size: 1em;
+    cursor: pointer; background: #f5f5f5; color: #333; display: flex; align-items: center; gap: 6px;
+    transition: background 0.15s, color 0.15s;
+}
+.add-cart { background: #3bb77e; color: #fff; }
+.add-cart:hover { background: #2fa96b; }
+.save-btn { background: #ffeaea; color: #e74c3c; }
+.save-btn:hover { background: #e74c3c; color: #fff; }
+.share-btn { background: #eaf2ff; color: #2980ef; }
+.share-btn:hover { background: #2980ef; color: #fff; }
+.design-btn { background: #f7f7f7; color: #8e44ad; text-decoration: none; }
+.design-btn:hover { background: #8e44ad; color: #fff; }
+.modal-feedback {
+    position: fixed;
+    top: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #222;
+    color: #fff;
+    padding: 12px 32px;
+    border-radius: 8px;
+    font-size: 1.1em;
+    z-index: 11000;
+    opacity: 0.95;
+    box-shadow: 0 2px 12px #0003;
+    transition: opacity 0.3s;
+    pointer-events: none;
+}
+@media (max-width: 600px) {
+    .modal-content { width: 98vw; }
+    .modal-body { flex-direction: column; align-items: center; padding: 18px 8px 12px 8px; }
+    .modal-image img { width: 100px; height: 100px; }
+}
+@keyframes fadeIn { from { opacity: 0; transform: scale(0.97);} to { opacity: 1; transform: scale(1);} }
+</style>
+<script>
+function openProductModal(product) {
+    document.getElementById('modalProductImg').src = product.Image;
+    document.getElementById('modalProductName').innerText = product.Item;
+    document.getElementById('modalProductBrand').innerText = product.Brand;
+    document.getElementById('modalProductPrice').innerText = "$" + product.Price;
+    document.getElementById('modalProductId').value = product.ProductId;
+    document.getElementById('modalDesignLink').href = "/product/" + product.ProductId;
+    // Set save form action
+    document.getElementById('modalSaveForm').action = "/save_item/" + product.ProductId;
+    // Set default size in hidden fields
+    var size = document.getElementById('modalProductSize').value;
+    document.getElementById('modalCartSize').value = size;
+    document.getElementById('modalSaveSize').value = size;
+    document.getElementById('productModal').style.display = "flex";
+}
+function closeProductModal() {
+    document.getElementById('productModal').style.display = "none";
+}
+function showModalFeedback(msg) {
+    var box = document.getElementById('modalFeedback');
+    box.innerText = msg;
+    box.style.display = 'block';
+    box.style.opacity = '0.95';
+    setTimeout(function() {
+        box.style.opacity = '0';
+        setTimeout(function() { box.style.display = 'none'; }, 350);
+    }, 1500);
+}
+document.getElementById('modalAddToCartForm').onsubmit = function(e) {
+    showModalFeedback("Added to cart!");
+    // Optionally, you can prevent default and do AJAX here
+    // e.preventDefault();
+};
+document.getElementById('modalSaveForm').onsubmit = function(e) {
+    showModalFeedback("Saved for later!");
+    // Optionally, you can prevent default and do AJAX here
+    // e.preventDefault();
+};
+function shareProductModal() {
+    const url = window.location.origin + "/product/" + document.getElementById('modalProductId').value;
+    navigator.clipboard.writeText(url);
+    showModalFeedback("Product link copied!");
+}
+document.getElementById('modalProductSize').onchange = function() {
+    var size = this.value;
+    document.getElementById('modalCartSize').value = size;
+    document.getElementById('modalSaveSize').value = size;
+};
+</script>

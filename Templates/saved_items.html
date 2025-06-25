@@ -15,7 +15,11 @@
         <div class="sc_1_middle">
           <span>{{ product.brand }}</span>
           <h5>{{ product.item }}</h5>
-          <span>${{ product.price }}</span>
+          {% if product.DesignImage %}
+            <a href="{{ url_for('product', product_id=product.ProductId) }}?design={{ product.DesignImage }}" style="color:#3bb77e; text-decoration:underline; cursor:pointer;">
+              Custom Design
+            </a>
+          {% endif %}
         </div>
         <div class="sc_1_right">
           <form class="remove-form" action="{{ url_for('remove_saved_item', product_id=product.ProductId) }}" method="POST">

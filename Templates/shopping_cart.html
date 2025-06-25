@@ -59,6 +59,7 @@
         <th>Item</th>
         <th>Brand</th>
         <th>Unit Price</th>
+        <th>Size</th>
         <th>Quantity</th>
         <th>Subtotal</th>
       </tr>
@@ -72,6 +73,7 @@
         </td>
         <td>{{ product.brand }}</td>
         <td>${{ product.price }}</td>
+        <td>{{ product.Size if product.Size else 'M' }}</td>
         <td>
           <input type="number" name="quantity" id="table_quantity_{{ loop.index0 }}" value="1" min="1" onchange="updateTableTotal({ loop,index0 }, productPrices[{ loop,index0 }])"><!--dynamic quantity input-->
         </td>
@@ -81,7 +83,7 @@
     </tbody>
     <tfoot>
       <tr>
-        <td colspan="4" style="text-align:right;font-weight:bold;">Total:</td>
+        <td colspan="5" style="text-align:right;font-weight:bold;">Total:</td>
         <td style="font-weight:bold;">$<span id="table_grand_total">0.00</span></td><!--  dynamic total price -->
       </tr>
     </tfoot>
@@ -95,6 +97,7 @@
       <div class="sc_1_middle">
         <span>{{ product.brand }}</span>
         <h5>{{ product.item }}</h5>
+        <span>Size: {{ product.Size if product.Size else 'M' }}</span><br>
         <label class="quantity" for="quantity">Quantity:</label>
         <input type="number" name="quantity" id="quantity_{{ loop.index0 }}" value="1" min="1" onchange="updateTotal({ loop,index0 }, productPrices[{ loop,index0 }])">
         <span>× ${{ product.price }} = $<span id="total_{{ loop.index0 }}">{{ product.price }}</span></span>
@@ -206,4 +209,3 @@
   {% endif %}
 </div>
 {% endblock %}
- 

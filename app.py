@@ -5,6 +5,7 @@ import sqlite3
 import re
 import os
 from datetime import datetime, timedelta
+import base64
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -36,6 +37,15 @@ def login():
     if request.method == 'POST':
         username_or_email = request.form['username']
         password = request.form['password']
+        # Admin credentials logic
+        admin_username = 'admin'
+        admin_password = 'admin123'
+        if username_or_email == admin_username and password == admin_password:
+            session['logged_in'] = True
+            session['is_admin'] = True
+            session['username'] = admin_username
+            return redirect(url_for('admin_dashboard'))
+        # ...existing user login code...
         conn = get_db_connection()
         user = conn.execute(
             'SELECT * FROM Users WHERE Email = ? OR Name = ?', 
@@ -161,11 +171,38 @@ def shopping_cart():
     user_id = session['user_id']
     with get_db_connection() as conn:
         cart_items = conn.execute(
-            '''SELECT Products.*, CartItems.Quantity FROM CartItems
+            '''SELECT Products.*, CartItems.Quantity, CartItems.Size FROM CartItems
                JOIN Products ON CartItems.ProductId = Products.ProductId
                WHERE CartItems.UserId = ?''', (user_id,)
         ).fetchall()
     return render_template('shopping_cart.html', products=cart_items)
+
+@app.route('/save_design/<int:product_id>', methods=['POST'])
+def save_design(product_id):
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    user_id = session['user_id']
+    design_data = request.form.get('design_data')
+    if not design_data:
+        return "No design data", 400
+    # Save as file in static/saved_designs/
+    design_dir = os.path.join(app.root_path, 'static', 'saved_designs')
+    os.makedirs(design_dir, exist_ok=True)
+    filename = f"user{user_id}_product{product_id}_{int(datetime.now().timestamp())}.png"
+    filepath = os.path.join(design_dir, filename)
+    # Remove the data:image/png;base64, part if present
+    if ',' in design_data:
+        design_data = design_data.split(',')[1]
+    with open(filepath, "wb") as f:
+        f.write(base64.b64decode(design_data))
+    # Save reference in SavedItems table (add DesignImage column if not exists)
+    with get_db_connection() as conn:
+        conn.execute(
+            'INSERT INTO SavedItems (UserId, ProductId, Size, DesignImage) VALUES (?, ?, ?, ?)',
+            (user_id, product_id, request.form.get('size', 'M'), f"saved_designs/{filename}")
+        )
+        conn.commit()
+    return redirect(url_for('saved_items'))
 
 @app.route('/saved_items')
 def saved_items():
@@ -174,7 +211,7 @@ def saved_items():
     user_id = session['user_id']
     with get_db_connection() as conn:
         saved_items = conn.execute(
-            '''SELECT Products.* FROM SavedItems
+            '''SELECT Products.*, SavedItems.DesignImage FROM SavedItems
                JOIN Products ON SavedItems.ProductId = Products.ProductId
                WHERE SavedItems.UserId = ?''', (user_id,)
         ).fetchall()
@@ -266,21 +303,21 @@ def add_to_cart(product_id):
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     user_id = session['user_id']
+    size = request.form.get('size', 'M')  # Default to 'M' if not provided
     with get_db_connection() as conn:
         existing = conn.execute(
-            'SELECT * FROM CartItems WHERE UserId = ? AND ProductId = ?', (user_id, product_id)
+            'SELECT * FROM CartItems WHERE UserId = ? AND ProductId = ? AND (Size = ? OR Size IS NULL)',
+            (user_id, product_id, size)
         ).fetchone()
         if existing:
-            # Always increment by 1 if already exists
             conn.execute(
-                'UPDATE CartItems SET Quantity = Quantity + 1 WHERE UserId = ? AND ProductId = ?',
-                (user_id, product_id)
+                'UPDATE CartItems SET Quantity = Quantity + 1 WHERE UserId = ? AND ProductId = ? AND (Size = ? OR Size IS NULL)',
+                (user_id, product_id, size)
             )
         else:
-            # Add with quantity 1 if not exists
             conn.execute(
-                'INSERT INTO CartItems (UserId, ProductId, Quantity) VALUES (?, ?, ?)',
-                (user_id, product_id, 1)
+                'INSERT INTO CartItems (UserId, ProductId, Quantity, Size) VALUES (?, ?, ?, ?)',
+                (user_id, product_id, 1, size)
             )
         conn.commit()
     return redirect(url_for('shopping_cart'))
@@ -290,14 +327,16 @@ def save_item(product_id):
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     user_id = session['user_id']
+    size = request.form.get('size', 'M')
     with get_db_connection() as conn:
         exists = conn.execute(
-            'SELECT * FROM SavedItems WHERE UserId = ? AND ProductId = ?', (user_id, product_id)
+            'SELECT * FROM SavedItems WHERE UserId = ? AND ProductId = ? AND (Size = ? OR Size IS NULL)',
+            (user_id, product_id, size)
         ).fetchone()
         if not exists:
             conn.execute(
-                'INSERT INTO SavedItems (UserId, ProductId) VALUES (?, ?)',
-                (user_id, product_id)
+                'INSERT INTO SavedItems (UserId, ProductId, Size) VALUES (?, ?, ?)',
+                (user_id, product_id, size)
             )
             conn.commit()
     return redirect(url_for('saved_items'))
@@ -349,10 +388,9 @@ def search():
 
 @app.route('/admin')
 def admin_dashboard():
-    if not session.get('logged_in') or session.get('username') != 'admin':  
+    if not session.get('logged_in') or not session.get('is_admin'):
         return redirect(url_for('login'))
     with get_db_connection() as conn:
-
         custom_requests = conn.execute('SELECT * FROM CustomRequests').fetchall()
         orders = conn.execute('SELECT * FROM Orders').fetchall()
         products = conn.execute('SELECT * FROM Products').fetchall()
@@ -384,6 +422,7 @@ def reject_request(request_id):
 def product(product_id):
     if not session.get('logged_in'):
         return redirect(url_for('login'))
+    design_image = request.args.get('design')
     with get_db_connection() as conn:
         product = conn.execute('SELECT * FROM Products WHERE ProductId = ?', (product_id,)).fetchone()
         if not product:
@@ -395,7 +434,7 @@ def product(product_id):
                 (session['user_id'], product_id, custom_text, 'pending')
             )
             conn.commit()
-    return render_template('product.html', product=product, custom_text=custom_text)
+    return render_template('product.html', product=product, custom_text=custom_text, design_image=design_image)
 
 @app.route('/checkout', methods=['POST'])
 def checkout():
@@ -432,7 +471,33 @@ def checkout():
 
     return render_template('order_confirmation.html', arrival_date=arrival_date)
 
-
+@app.route('/product_catalogue', methods=['GET', 'POST'])
+def product_catalogue():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    user_id = session['user_id']
+    with get_db_connection() as conn:
+        products = conn.execute('SELECT * FROM Products').fetchall()
+    # Handle add to cart POST
+    if request.method == 'POST':
+        product_id = int(request.form['product_id'])
+        with get_db_connection() as conn:
+            existing = conn.execute(
+                'SELECT * FROM CartItems WHERE UserId = ? AND ProductId = ?', (user_id, product_id)
+            ).fetchone()
+            if existing:
+                conn.execute(
+                    'UPDATE CartItems SET Quantity = Quantity + 1 WHERE UserId = ? AND ProductId = ?',
+                    (user_id, product_id)
+                )
+            else:
+                conn.execute(
+                    'INSERT INTO CartItems (UserId, ProductId, Quantity) VALUES (?, ?, ?)',
+                    (user_id, product_id, 1)
+                )
+            conn.commit()
+        return redirect(url_for('product_catalogue'))
+    return render_template('product_catalogue.html', products=products)
 
 if __name__ == '__main__':
     app.run(debug=True)
