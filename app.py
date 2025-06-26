@@ -499,5 +499,93 @@ def product_catalogue():
         return redirect(url_for('product_catalogue'))
     return render_template('product_catalogue.html', products=products)
 
+from flask import flash
+
+@app.route('/admin/edit_product/<int:product_id>', methods=['GET', 'POST'])
+def admin_edit_product(product_id):
+    if not session.get('logged_in') or not session.get('is_admin'):
+        return redirect(url_for('login'))
+    with get_db_connection() as conn:
+        product = conn.execute('SELECT * FROM Products WHERE ProductId = ?', (product_id,)).fetchone()
+        if not product:
+            flash('Product not found.', 'danger')
+            return redirect(url_for('admin_dashboard'))
+        if request.method == 'POST':
+            new_price = request.form.get('price')
+            try:
+                new_price = float(new_price)
+                conn.execute('UPDATE Products SET Price = ? WHERE ProductId = ?', (new_price, product_id))
+                conn.commit()
+                flash('Price updated successfully.', 'success')
+            except Exception:
+                flash('Invalid price.', 'danger')
+            return redirect(url_for('admin_dashboard'))
+    return render_template('edit_product.html', product=product)
+
+@app.route('/admin/edit_user/<int:user_id>', methods=['GET', 'POST'])
+def admin_edit_user(user_id):
+    if not session.get('logged_in') or not session.get('is_admin'):
+        return redirect(url_for('login'))
+    with get_db_connection() as conn:
+        user = conn.execute('SELECT * FROM Users WHERE UserId = ?', (user_id,)).fetchone()
+        if not user:
+            flash('User not found.', 'danger')
+            return redirect(url_for('admin_dashboard'))
+        if request.method == 'POST':
+            display_name = request.form.get('display_name')
+            email = request.form.get('email')
+            password = request.form.get('password')
+            updates = []
+            params = []
+            if display_name:
+                updates.append('DisplayName = ?')
+                params.append(display_name)
+            if email:
+                updates.append('Email = ?')
+                params.append(email)
+            if password:
+                hashed = generate_password_hash(password)
+                updates.append('Password = ?')
+                params.append(hashed)
+            if updates:
+                params.append(user_id)
+                conn.execute(f'UPDATE Users SET {", ".join(updates)} WHERE UserId = ?', params)
+                conn.commit()
+                flash('User updated successfully.', 'success')
+            return redirect(url_for('admin_dashboard'))
+    return render_template('edit_user.html', user=user)
+
+@app.route('/admin/add_product', methods=['POST'])
+def admin_add_product():
+    if not session.get('logged_in') or not session.get('is_admin'):
+        return redirect(url_for('login'))
+    item = request.form.get('item')
+    brand = request.form.get('brand')
+    price = request.form.get('price')
+    image_file = request.files.get('image')
+    image_path = None
+    if image_file and image_file.filename:
+        filename = secure_filename(image_file.filename)
+        image_folder = os.path.join(app.root_path, 'static', 'products')
+        os.makedirs(image_folder, exist_ok=True)
+        image_path = os.path.join('products', filename)
+        image_file.save(os.path.join(image_folder, filename))
+    with get_db_connection() as conn:
+        conn.execute(
+            'INSERT INTO Products (Item, Brand, Price, Image) VALUES (?, ?, ?, ?)',
+            (item, brand, price, image_path)
+        )
+        conn.commit()
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/delete_product/<int:product_id>', methods=['POST'])
+def admin_delete_product(product_id):
+    if not session.get('logged_in') or not session.get('is_admin'):
+        return redirect(url_for('login'))
+    with get_db_connection() as conn:
+        conn.execute('DELETE FROM Products WHERE ProductId = ?', (product_id,))
+        conn.commit()
+    return redirect(url_for('admin_dashboard'))
+
 if __name__ == '__main__':
     app.run(debug=True)

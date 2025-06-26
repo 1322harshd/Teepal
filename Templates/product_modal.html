@@ -12,10 +12,7 @@
                 <div class="modal-actions">
                     <label for="modalProductSize" style="margin-bottom:4px;">Select Size:</label>
                     <select id="modalProductSize" name="size" style="margin-bottom:10px;">
-                        <option value="S">Small</option>
-                        <option value="M" selected>Medium</option>
-                        <option value="L">Large</option>
-                        <option value="XL">X-Large</option>
+                        <!-- Sizes will be populated by JS -->
                     </select>
                     <form id="modalAddToCartForm" method="POST" style="display:inline;">
                         <input type="hidden" name="product_id" id="modalProductId">
@@ -107,10 +104,53 @@ function openProductModal(product) {
     document.getElementById('modalDesignLink').href = "/product/" + product.ProductId;
     // Set save form action
     document.getElementById('modalSaveForm').action = "/save_item/" + product.ProductId;
-    // Set default size in hidden fields
-    var size = document.getElementById('modalProductSize').value;
-    document.getElementById('modalCartSize').value = size;
-    document.getElementById('modalSaveSize').value = size;
+
+    // Dynamically set size options based on product type
+    var sizeSelect = document.getElementById('modalProductSize');
+    sizeSelect.innerHTML = ""; // Clear previous options
+
+    // Lowercase for checks
+    let itemName = (product.Item || "").toLowerCase();
+    let category = (product.Category || "").toLowerCase();
+
+    // Remove size selection for cap, bottle, mug, bag
+    if (
+        itemName.includes("cap") || category.includes("cap") ||
+        itemName.includes("bottle") || category.includes("bottle") ||
+        itemName.includes("mug") || category.includes("mug") ||
+        itemName.includes("bag") || category.includes("bag")
+    ) {
+        sizeSelect.style.display = "none";
+        document.querySelector('label[for="modalProductSize"]').style.display = "none";
+        document.getElementById('modalCartSize').value = "";
+        document.getElementById('modalSaveSize').value = "";
+    } else {
+        sizeSelect.style.display = "";
+        document.querySelector('label[for="modalProductSize"]').style.display = "";
+        if (itemName.includes("shoe") || category.includes("shoe")) {
+            // Shoe sizes 5-12
+            for (let i = 5; i <= 12; i++) {
+                let opt = document.createElement('option');
+                opt.value = i;
+                opt.innerText = i;
+                sizeSelect.appendChild(opt);
+            }
+        } else {
+            // Shirt sizes
+            let sizes = ["S", "M", "L", "XL"];
+            sizes.forEach(function(sz, idx) {
+                let opt = document.createElement('option');
+                opt.value = sz;
+                opt.innerText = (sz === "S" ? "Small" : sz === "M" ? "Medium" : sz === "L" ? "Large" : "X-Large");
+                if (sz === "M") opt.selected = true;
+                sizeSelect.appendChild(opt);
+            });
+        }
+        // Set default size in hidden fields
+        var size = sizeSelect.value;
+        document.getElementById('modalCartSize').value = size;
+        document.getElementById('modalSaveSize').value = size;
+    }
     document.getElementById('productModal').style.display = "flex";
 }
 function closeProductModal() {

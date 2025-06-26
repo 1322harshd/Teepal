@@ -20,6 +20,7 @@
               Custom Design
             </a>
           {% endif %}
+          <div id="palette_{{ product.ProductId }}" class="saved-palette" style="display:flex;gap:8px;margin-top:8px;"></div>
         </div>
         <div class="sc_1_right">
           <form class="remove-form" action="{{ url_for('remove_saved_item', product_id=product.ProductId) }}" method="POST">
@@ -38,4 +39,19 @@
     {% endfor %}
   {% endif %}
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% for product in products %}
+    const palette = localStorage.getItem('palette_{{ product.ProductId }}');
+    const selected = localStorage.getItem('selected_palette_color_{{ product.ProductId }}');
+    const el = document.getElementById('palette_{{ product.ProductId }}');
+    if (palette && el) {
+        const colors = JSON.parse(palette);
+        el.innerHTML = colors.map(hex => 
+            `<div title="${hex}" style="width:24px;height:24px;border-radius:50%;background:${hex};border:2px solid #eee;${selected === hex ? 'box-shadow:0 0 0 3px #3bb77e;' : ''}"></div>`
+        ).join('');
+    }
+    {% endfor %}
+});
+</script>
 {% endblock %}

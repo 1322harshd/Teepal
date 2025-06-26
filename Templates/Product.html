@@ -146,6 +146,10 @@
             .product-img-card { width: 98vw; }
             #canvas { width: 98vw !important; }
         }
+        /* Add this style for selected palette color */
+        .palette-color-choice {
+            transition: box-shadow 0.18s;
+        }
     </style>
 </head>
 <body>
@@ -175,6 +179,7 @@
                 <label for="imageUpload" style="margin-bottom:0;">Upload Image</label>
                 <input type="file" id="imageUpload" accept="image/*" onchange="addImage()">
                 <button onclick="clearCanvas()" style="background:#e74c3c;">Clear</button>
+                <button type="button" onclick="openAutoSuggest()" style="background:#3b6bb7;">AutoSuggest</button>
             </div>
             <div class="action-buttons">
                 <form id="saveDesignForm" method="POST" enctype="application/x-www-form-urlencoded" action="{{ url_for('save_design', product_id=product.ProductId) }}">
@@ -183,6 +188,74 @@
                 </form>
                 <button onclick="closeModal()">Back to Product</button>
             </div>
+        </div>
+    </div>
+    <!-- AutoSuggest Modal -->
+    <div id="autoSuggestModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.35); align-items:center; justify-content:center;">
+        <div style="background:#fff; border-radius:12px; max-width:420px; width:95vw; padding:28px 22px 18px 22px; box-shadow:0 6px 32px #0002; position:relative;">
+            <h3 style="margin-top:0; color:#3b6bb7;">Personalize Your Design</h3>
+            <form id="autoSuggestForm">
+                <div style="margin-bottom:18px;">
+                    <label>1. How much do you like parties?</label>
+                    <input type="range" min="1" max="5" value="3" name="q1" style="width:100%;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.9em;">
+                        <span>Introverted</span><span>Extroverted</span>
+                    </div>
+                </div>
+                <div style="margin-bottom:18px;">
+                    <label>2. How spontaneous are you?</label>
+                    <input type="range" min="1" max="5" value="3" name="q2" style="width:100%;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.9em;">
+                        <span>Routine</span><span>Spontaneous</span>
+                    </div>
+                </div>
+                <div style="margin-bottom:18px;">
+                    <label>3. How much do you enjoy nature and the outdoors?</label>
+                    <input type="range" min="1" max="5" value="3" name="q3" style="width:100%;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.9em;">
+                        <span>Indoorsy</span><span>Outdoorsy</span>
+                    </div>
+                </div>
+                <div style="margin-bottom:18px;">
+                    <label>4. How adventurous is your fashion sense?</label>
+                    <input type="range" min="1" max="5" value="3" name="q4" style="width:100%;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.9em;">
+                        <span>Conservative</span><span>Adventurous</span>
+                    </div>
+                </div>
+                <div style="margin-bottom:18px;">
+                    <label>5. Do you like standing out in a crowd?</label>
+                    <input type="range" min="1" max="5" value="3" name="q5" style="width:100%;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.9em;">
+                        <span>Blends in</span><span>Stands out</span>
+                    </div>
+                </div>
+                <div style="margin-bottom:18px;">
+                    <label>6. How much do you enjoy quiet, peaceful environments?</label>
+                    <input type="range" min="1" max="5" value="3" name="q6" style="width:100%;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.9em;">
+                        <span>Calm</span><span>Dynamic</span>
+                    </div>
+                </div>
+                <div style="margin-bottom:18px;">
+                    <label>7. Do you prefer classic styles over modern trends?</label>
+                    <input type="range" min="1" max="5" value="3" name="q7" style="width:100%;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.9em;">
+                        <span>Classic</span><span>Modern</span>
+                    </div>
+                </div>
+                <div style="margin-bottom:18px;">
+                    <label>8. How much do you enjoy surprises and unpredictability?</label>
+                    <input type="range" min="1" max="5" value="3" name="q8" style="width:100%;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.9em;">
+                        <span>Order</span><span>Surprises</span>
+                    </div>
+                </div>
+                <div style="text-align:right;">
+                    <button type="button" onclick="closeAutoSuggest()" style="background:#aaa; margin-right:8px;">Cancel</button>
+                    <button type="button" onclick="submitAutoSuggest()" style="background:#3b6bb7;">Submit</button>
+                </div>
+            </form>
         </div>
     </div>
     <script>
@@ -251,7 +324,7 @@
         }
 
         function closeModal() {
-            window.location.href = "{{ url_for('product', product_id=product.ProductId) }}";
+            window.location.href = "{{ url_for('product_catalogue') }}";
         }
 
         // Ensure all objects are always selectable and movable
@@ -283,6 +356,194 @@
             });
         });
         {% endif %}
+
+        function openAutoSuggest() {
+            document.getElementById('autoSuggestModal').style.display = 'flex';
+        }
+        function closeAutoSuggest() {
+            document.getElementById('autoSuggestModal').style.display = 'none';
+        }
+
+        // Store the last suggested color palette globally
+        let lastSuggestedPalette = [];
+
+        function submitAutoSuggest() {
+            const form = document.getElementById('autoSuggestForm');
+            const data = {};
+            for (let i = 1; i <= 8; i++) {
+                data['q' + i] = parseInt(form['q' + i].value);
+            }
+
+            // Color mapping for each question
+            const colorMap = [
+                ["#B0BEC5 (Cool Gray)", "#90CAF9 (Light Blue)", "#FFF176 (Yellow)", "#FF7043 (Orange)", "#D50000 (Vibrant Red)"],
+                ["#BDBDBD (Gray)", "#AED581 (Light Green)", "#FFD54F (Amber)", "#BA68C8 (Purple)", "#F06292 (Pink)"],
+                ["#CFD8DC (Urban Gray)", "#90A4AE (Slate)", "#A5D6A7 (Leaf Green)", "#8D6E63 (Earth Brown)", "#388E3C (Forest Green)"],
+                ["#F5F5F5 (White)", "#B39DDB (Pastel Purple)", "#FFB74D (Soft Orange)", "#FF8A65 (Coral)", "#311B92 (Bold Indigo)"],
+                ["#B0BEC5 (Muted Gray)", "#90A4AE (Blue Gray)", "#FFD600 (Bright Yellow)", "#FF1744 (Hot Pink)", "#00E676 (Neon Green)"],
+                ["#ECEFF1 (Calm Gray)", "#B2EBF2 (Aqua)", "#FFF9C4 (Light Yellow)", "#FFCCBC (Peach)", "#FF3D00 (Dynamic Orange)"],
+                ["#263238 (Navy)", "#795548 (Brown)", "#F8BBD0 (Blush)", "#00B8D4 (Cyan)", "#FFEB3B (Trendy Yellow)"],
+                ["#E0E0E0 (Orderly Gray)", "#B2DFDB (Mint)", "#FFF176 (Yellow)", "#FF8A65 (Playful Coral)", "#D500F9 (Vivid Purple)"]
+            ];
+
+            // Design mapping for each question
+            const designMap = [
+                ["Plain", "Neutral", "Trendy", "Patterned", "Bold Patterns"],
+                ["Symmetrical", "Geometric", "Soft Abstract", "Playful", "Irregular Abstract"],
+                ["Industrial", "Urban", "Leafy", "Earthy", "Organic"],
+                ["Minimal", "Pastel", "Expressive", "Mixed Patterns", "Eccentric"],
+                ["Subtle", "Soft", "Statement", "High Contrast", "Striking"],
+                ["Minimal", "Soothing", "Soft", "Dynamic", "Vibrant"],
+                ["Classic", "Vintage", "Modern Classic", "Trendy", "Contemporary"],
+                ["Orderly", "Simple", "Layered", "Unexpected", "Complex"]
+            ];
+
+            // Collect color and design suggestions for each answer
+            let colorSuggestions = [];
+            let designSuggestions = [];
+            for (let i = 1; i <= 8; i++) {
+                colorSuggestions.push(colorMap[i - 1][data['q' + i] - 1]);
+                designSuggestions.push(designMap[i - 1][data['q' + i] - 1]);
+            }
+
+            // Find the most frequent color and design
+            function mostFrequent(arr) {
+                const freq = {};
+                let max = 0, result = arr[0];
+                for (const v of arr) {
+                    freq[v] = (freq[v] || 0) + 1;
+                    if (freq[v] > max) {
+                        max = freq[v];
+                        result = v;
+                    }
+                }
+                return result;
+            }
+
+            const mainColor = mostFrequent(colorSuggestions);
+            const mainDesign = mostFrequent(designSuggestions);
+
+            // Extract only hex codes for palette
+            lastSuggestedPalette = [...new Set(colorSuggestions.map(c => c.split(' ')[0]))];
+
+            // Build color palette HTML
+            let paletteHtml = `<div id="suggestedPalette" style="display:flex;gap:8px;margin:12px 0 0 0;">` +
+                lastSuggestedPalette.map(hex => `<div title="${hex}" style="width:32px;height:32px;border-radius:50%;background:${hex};border:2px solid #eee;"></div>`).join('') +
+                `</div>`;
+
+            // Build suggestion message with details
+            let colorList = colorSuggestions.map((c, i) => `<li>Q${i+1}: <span style="color:${c.split(' ')[0]};font-weight:bold;">${c}</span></li>`).join('');
+            let designList = designSuggestions.map((d, i) => `<li>Q${i+1}: <b>${d}</b></li>`).join('');
+
+            let suggestions = [];
+            suggestions.push(`🎨 <b>Main Suggested Color:</b> <span id="mainColorSpan" style="color:${mainColor.split(' ')[0]};font-weight:bold;">${mainColor}</span>`);
+            suggestions.push(paletteHtml);
+            suggestions.push(`<ul style="margin:8px 0 0 0; padding-left:18px;">${colorList}</ul>`);
+            suggestions.push(`🖌️ <b>Main Suggested Design Style:</b> <b>${mainDesign}</b>`);
+            suggestions.push(`<ul style="margin:8px 0 0 0; padding-left:18px;">${designList}</ul>`);
+            suggestions.push(`<div style="text-align:right; margin-top:18px;">
+                <button type="button" onclick="savePaletteToLocal()" style="background:#3bb77e; color:#fff; border:none; border-radius:6px; padding:8px 18px; font-size:1em; margin-right:8px;">Save Palette</button>
+                <button type="button" onclick="document.getElementById('suggestionModal').style.display='none';" style="background:#aaa; color:#fff; border:none; border-radius:6px; padding:8px 18px; font-size:1em;">Close</button>
+            </div>`);
+
+            // Show suggestions in a styled modal
+            document.getElementById('autoSuggestModal').style.display = 'none';
+            showSuggestionModal(suggestions.join("<br><br>"));
+        }
+
+        // Show a modal with the suggestions
+        function showSuggestionModal(htmlContent) {
+            let modal = document.getElementById('suggestionModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'suggestionModal';
+                modal.style.position = 'fixed';
+                modal.style.left = 0;
+                modal.style.top = 0;
+                modal.style.width = '100vw';
+                modal.style.height = '100vh';
+                modal.style.background = 'rgba(0,0,0,0.35)';
+                modal.style.display = 'flex';
+                modal.style.alignItems = 'center';
+                modal.style.justifyContent = 'center';
+                modal.style.zIndex = 10000;
+                modal.innerHTML = `
+                    <div style="background:#fff; border-radius:12px; max-width:420px; width:95vw; padding:28px 22px 18px 22px; box-shadow:0 6px 32px #0002; position:relative;">
+                        <h3 style="margin-top:0; color:#3b6bb7;">Your Style Suggestions</h3>
+                        <div id="suggestionContent" style="margin-bottom:18px; font-size:1.1em;">${htmlContent}</div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            } else {
+                modal.querySelector('#suggestionContent').innerHTML = htmlContent;
+                modal.style.display = 'flex';
+            }
+        }
+
+        // Save palette to localStorage for use in saved items
+        function savePaletteToLocal() {
+            if (lastSuggestedPalette && lastSuggestedPalette.length > 0) {
+                // Save palette as a JSON string with product id as key
+                localStorage.setItem('palette_{{ product.ProductId }}', JSON.stringify(lastSuggestedPalette));
+                alert('Color palette saved! It will appear with your saved product.');
+            }
+            document.getElementById('suggestionModal').style.display = 'none';
+            // Optionally, show the palette near the save button
+            showPaletteNearSave();
+        }
+
+        // Show the palette near the save button (on this page) with selectable option
+        function showPaletteNearSave() {
+            let paletteDiv = document.getElementById('savedPaletteDisplay');
+            if (!paletteDiv) {
+                paletteDiv = document.createElement('div');
+                paletteDiv.id = 'savedPaletteDisplay';
+                paletteDiv.style.display = 'flex';
+                paletteDiv.style.gap = '8px';
+                paletteDiv.style.margin = '16px 0 0 0';
+                document.querySelector('.action-buttons').appendChild(paletteDiv);
+            }
+            // Make each color selectable (only one can be selected)
+            paletteDiv.innerHTML = lastSuggestedPalette.map((hex, idx) => `
+                <div 
+                    title="${hex}" 
+                    class="palette-color-choice" 
+                    data-hex="${hex}" 
+                    style="width:32px;height:32px;border-radius:50%;background:${hex};border:2px solid #eee;cursor:pointer;box-shadow:0 0 0 2px transparent;"
+                    onclick="selectPaletteColor(this)">
+                </div>
+            `).join('');
+        }
+
+        // Add this function to handle selection
+        function selectPaletteColor(el) {
+            // Remove selection from all
+            document.querySelectorAll('.palette-color-choice').forEach(div => {
+                div.style.boxShadow = "0 0 0 2px transparent";
+            });
+            // Highlight selected
+            el.style.boxShadow = "0 0 0 3px #3bb77e";
+            // Store selected color in localStorage for this product
+            localStorage.setItem('selected_palette_color_{{ product.ProductId }}', el.getAttribute('data-hex'));
+        }
+
+        // On page load, show palette if already saved and restore selection
+        document.addEventListener('DOMContentLoaded', function() {
+            const saved = localStorage.getItem('palette_{{ product.ProductId }}');
+            if (saved) {
+                lastSuggestedPalette = JSON.parse(saved);
+                showPaletteNearSave();
+                // Restore selection if any
+                const selected = localStorage.getItem('selected_palette_color_{{ product.ProductId }}');
+                if (selected) {
+                    document.querySelectorAll('.palette-color-choice').forEach(div => {
+                        if (div.getAttribute('data-hex') === selected) {
+                            div.style.boxShadow = "0 0 0 3px #3bb77e";
+                        }
+                    });
+                }
+            }
+        });
     </script>
 </body>
 </html>
