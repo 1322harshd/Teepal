@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width:400px;margin:60px auto;padding:32px;background:#fff;border-radius:12px;box-shadow:0 2px 12px #0001;">
+    <h2 style="text-align:center;">Admin Login</h2>
+    {% if error %}
+        <div style="color:red;text-align:center;margin-bottom:12px;">{{ error }}</div>
+    {% endif %}
+    <form method="POST">
+        <label for="username">Username</label>
+        <input type="text" name="username" required class="form-control" style="width:100%;margin-bottom:12px;">
+        <label for="password">Password</label>
+        <input type="password" name="password" required class="form-control" style="width:100%;margin-bottom:18px;">
+        <button type="submit" style="width:100%;background:#3bb77e;color:#fff;padding:10px 0;border:none;border-radius:6px;font-size:1.1em;">Login</button>
+    </form>
+</div>
+{% endblock %}

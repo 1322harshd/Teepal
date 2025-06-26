@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %} 
+<h2>Saved Items</h2>
+<div id="saved_items" class="lists" style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+  {% if products|length == 0 %}
+    <div class="empty-message" style="text-align:center; color:#888;">
+      <i class="fa-solid fa-box-open" style="font-size:2.5rem; margin-bottom:10px;"></i><br>
+      No items here yet.<br>
+      <a href="{{ url_for('home') }}" class="btn-primary" style="margin-top:18px;">Go Shopping</a>
+    </div>
+  {% else %}
+    {% for product in products %}
+      <div class="sc_1">
+        <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.item }}" width="100">
+        <div class="sc_1_middle">
+          <span>{{ product.brand }}</span>
+          <h5>{{ product.item }}</h5>
+          {% if product.DesignImage %}
+            <a href="{{ url_for('product', product_id=product.ProductId) }}?design={{ product.DesignImage }}" style="color:#3bb77e; text-decoration:underline; cursor:pointer;">
+              Custom Design
+            </a>
+          {% endif %}
+          <div id="palette_{{ product.ProductId }}" class="saved-palette" style="display:flex;gap:8px;margin-top:8px;"></div>
+        </div>
+        <div class="sc_1_right">
+          <form class="remove-form" action="{{ url_for('remove_saved_item', product_id=product.ProductId) }}" method="POST">
+            <button type="submit" title="Remove">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </form>
+          <button class="design-btn" onclick="window.location.href='/'">Design</button>
+          <form class="cart-form" action="{{ url_for('add_to_cart', product_id=product.ProductId) }}" method="POST">
+            <button type="submit" class="cart-fab-btn" title="Add to Cart">
+              <i class="fa-solid fa-shopping-cart"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+    {% endfor %}
+  {% endif %}
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% for product in products %}
+    const palette = localStorage.getItem('palette_{{ product.ProductId }}');
+    const selected = localStorage.getItem('selected_palette_color_{{ product.ProductId }}');
+    const el = document.getElementById('palette_{{ product.ProductId }}');
+    if (palette && el) {
+        const colors = JSON.parse(palette);
+        el.innerHTML = colors.map(hex => 
+            `<div title="${hex}" style="width:24px;height:24px;border-radius:50%;background:${hex};border:2px solid #eee;${selected === hex ? 'box-shadow:0 0 0 3px #3bb77e;' : ''}"></div>`
+        ).join('');
+    }
+    {% endfor %}
+});
+</script>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="product-catalogue-main">
+    <h2 class="catalogue-title">All Products</h2>
+    <div class="catalogue-list">
+        {% for product in products %}
+        <div class="catalogue-card"
+            style="cursor:pointer;"
+            data-product-id="{{ product.ProductId }}"
+            data-product-name="{{ product.Item }}"
+            data-product-brand="{{ product.Brand }}"
+            data-product-price="{{ product.Price }}"
+            data-product-image="{{ url_for('static', filename=product.Image) if product.Image else url_for('static', filename='product-placeholder.png') }}"
+            onclick="openProductModalFromCard(this)">
+            <div class="catalogue-img-wrap">
+                <img src="{{ url_for('static', filename=product.Image) if product.Image else url_for('static', filename='product-placeholder.png') }}" alt="{{ product.Item }}">
+            </div>
+            <div class="catalogue-info">
+                <span class="catalogue-brand">{{ product.Brand }}</span>
+                <span class="catalogue-name">{{ product.Item }}</span>
+            </div>
+            <div class="catalogue-bottom">
+                <span class="catalogue-price">${{ product.Price }}</span>
+                <form method="POST" style="margin:0;" onclick="event.stopPropagation();">
+                    <input type="hidden" name="product_id" value="{{ product.ProductId }}">
+                    <button type="submit" class="catalogue-cart-btn" title="Add to Cart">
+                        <i class="fa fa-shopping-cart"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% include 'product_modal.html' %}
+<script>
+function openProductModalFromCard(card) {
+    var product = {
+        ProductId: card.getAttribute('data-product-id'),
+        Item: card.getAttribute('data-product-name'),
+        Brand: card.getAttribute('data-product-brand'),
+        Price: card.getAttribute('data-product-price'),
+        Image: card.getAttribute('data-product-image')
+    };
+    openProductModal(product);
+}
+</script>
+<style>
+    body { margin: 0; font-family: Arial, sans-serif; background: #f5f5f5; }
+    .product-catalogue-main {
+        max-width: 1200px;
+        margin: 32px auto 0 auto;
+        padding: 0 24px;
+    }
+    .catalogue-title {
+        font-family: 'Poppins', Arial, sans-serif;
+        font-size: 1.5em;
+        font-weight: 700;
+        margin-bottom: 24px;
+        color: #222;
+    }
+    .catalogue-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 32px;
+    }
+    .catalogue-card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 4px 16px #0001;
+        width: 260px;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0 0 0 0;
+        transition: box-shadow 0.2s;
+        position: relative;
+        min-height: 340px;
+    }
+    .catalogue-card:hover {
+        box-shadow: 0 8px 24px #0002;
+    }
+    .catalogue-img-wrap {
+        width: 100%;
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        overflow: hidden;
+        background: #fafafa;
+    }
+    .catalogue-img-wrap img {
+        max-width: 100%;
+        max-height: 180px;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto;
+    }
+    .catalogue-info {
+        padding: 18px 24px 0 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .catalogue-brand {
+        font-size: 0.95em;
+        color: #888;
+        font-family: 'Poppins', Arial, sans-serif;
+        margin-bottom: 2px;
+    }
+    .catalogue-name {
+        font-size: 1.15em;
+        font-weight: 700;
+        color: #222;
+        font-family: 'Poppins', Arial, sans-serif;
+        margin-bottom: 0;
+    }
+    .catalogue-bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 24px 18px 24px;
+        margin-top: auto;
+    }
+    .catalogue-price {
+        font-size: 1.1em;
+        font-weight: 600;
+        color: #888;
+        font-family: 'Poppins', Arial, sans-serif;
+    }
+    .catalogue-cart-btn {
+        background: #eafaf2;
+        border: none;
+        border-radius: 50%;
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #3bb77e;
+        font-size: 1.3em;
+        cursor: pointer;
+        transition: background 0.2s;
+        box-shadow: 0 2px 8px #0001;
+    }
+    .catalogue-cart-btn:hover {
+        background: #3bb77e;
+        color: #fff;
+    }
+    @media (max-width: 900px) {
+        .catalogue-list { gap: 18px; }
+        .catalogue-card { width: 46vw; min-width: 180px; }
+    }
+    @media (max-width: 600px) {
+        .catalogue-list { flex-direction: column; gap: 18px; }
+        .catalogue-card { width: 100%; min-width: 0; }
+    }
+</style>
+{% endblock %}

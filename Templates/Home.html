@@ -1,0 +1,7 @@
+{% extends "base.html" %}<!-- this file extends from base.html-->
+  {% block content %}
+        {% import "_order_list.html" as lists %}<!--importing macro lists-->
+        {{ lists.order_list('Trending Orders', trending_orders, 'trending_orders') }}<!-- calling macro lists with parameters for different lists-->
+        {{ lists.order_list('Recent Orders', recent_orders, 'recent_orders') }}
+        {{ lists.order_list('My Orders', my_orders, 'my_orders') }}
+  {% endblock %}

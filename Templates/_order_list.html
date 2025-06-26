@@ -1,0 +1,23 @@
+{% macro order_list(title, orders, section_id) %}<!-- jinja macro for lists of same structure in the webpage-->
+<section><!-- section for each list -->
+    <h2>{{ title }}</h2><!-- title for each list title -->
+    <div id="{{ section_id }}" class="order-list-scroll"><!-- div container for each list-->
+        {% for order in orders %}<!-- jinja for loop on iterating products in database-->
+            <div class="to_1">
+                <img src="{{ url_for('static', filename=order.Image) }}" alt="{{ order.Item }}" width="100">
+                <span>{{ order.Brand }}</span>
+                <h5>{{ order.Item }}</h5>
+                <div class="to_1-footer">
+                    <h4>${{ order.Price }}</h4>
+                    <form action="{{ url_for('add_to_cart', product_id=order.ProductId) }}" method="POST"><!-- add to cart using post method-->
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-shopping-cart"></i> 
+                        </button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}<!-- for loop closed-->
+    </div>
+</section>
+{% endmacro %}<!-- macro closed-->
