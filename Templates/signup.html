@@ -2,13 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Sign Up | Teepal</title>
+    <title>sign up | teepal</title>
+    
+    <!-- link to external stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    
+    <!-- responsive settings for mobile devices -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- internal styles for signup page layout and design -->
     <style>
         body.signup-page {
             background: #fafbfc;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'poppins', sans-serif;
         }
         .signup-container {
             max-width: 420px;
@@ -82,89 +88,121 @@
     </style>
 </head>
 <body class="signup-page">
+
+    <!-- back button to return to homepage -->
     <a href="{{ url_for('logout_and_home') }}" class="btn-primary" style="background:#fff; color:#222; width:auto; display:inline-block; padding:8px 22px; position:absolute; left:18px; top:18px;">
-        ← Back
+        ← back
     </a>
+
+    <!-- main signup box -->
     <div class="signup-container" style="position:relative;">
-       <div class="login-logo">
-            <img src="{{ url_for('static', filename='logos/logo.png') }}" alt="Teepal Logo">
+
+        <!-- logo image at the top -->
+        <div class="login-logo">
+            <img src="{{ url_for('static', filename='logos/logo.png') }}" alt="teepal logo">
         </div>
-        <h2 style="text-align:center; margin-bottom:18px;">Create your Teepal account</h2>
+
+        <!-- heading for the form -->
+        <h2 style="text-align:center; margin-bottom:18px;">create your teepal account</h2>
+
+        <!-- signup form -->
         <form action="{{ url_for('register') }}" method="post" class="signup-form" enctype="multipart/form-data" novalidate>
+
+            <!-- full name input -->
             <div class="form-group">
-                <label for="display_name">Full Name</label>
+                <label for="display_name">full name</label>
                 <input type="text" id="display_name" name="display_name" required>
             </div>
+
+            <!-- username input -->
             <div class="form-group">
-                <label for="username">Username</label>
+                <label for="username">username</label>
                 <input type="text" id="username" name="username" required minlength="3" maxlength="20" pattern="^[a-zA-Z0-9_]+$">
             </div>
+
+            <!-- email input -->
             <div class="form-group">
-                <label for="email">Email</label>
+                <label for="email">email</label>
                 <input type="email" id="email" name="email" required>
             </div>
+
+            <!-- password input with toggle show/hide -->
             <div class="form-group" style="position:relative;">
-                <label for="password">Password</label>
+                <label for="password">password</label>
                 <input type="password" id="password" name="password" required minlength="6">
                 <button type="button" onclick="togglePassword('password', this)" style="position:absolute; right:10px; top:34px; background:none; border:none; cursor:pointer; font-size:0.95em; color:#888;">
-                    Show
+                    show
                 </button>
             </div>
+
+            <!-- confirm password input with toggle show/hide -->
             <div class="form-group" style="position:relative;">
-                <label for="confirm_password">Confirm Password</label>
+                <label for="confirm_password">confirm password</label>
                 <input type="password" id="confirm_password" name="confirm_password" required minlength="6">
                 <button type="button" onclick="togglePassword('confirm_password', this)" style="position:absolute; right:10px; top:34px; background:none; border:none; cursor:pointer; font-size:0.95em; color:#888;">
-                    Show
+                    show
                 </button>
             </div>
+
+            <!-- dropdown to select security question -->
             <div class="form-group">
-                <label for="security_question">Security Question</label>
+                <label for="security_question">security question</label>
                 <select id="security_question" name="security_question" required>
-                    <option value="" disabled selected>Select a security question</option>
-                    <option value="pet">What is the name of your first pet?</option>
-                    <option value="school">What is the name of your elementary school?</option>
-                    <option value="city">In what city were you born?</option>
-                    <option value="mother_maiden">What is your mother's maiden name?</option>
-                    <option value="favorite_food">What is your favorite food?</option>
+                    <option value="" disabled selected>select a security question</option>
+                    <option value="pet">what is the name of your first pet?</option>
+                    <option value="school">what is the name of your elementary school?</option>
+                    <option value="city">in what city were you born?</option>
+                    <option value="mother_maiden">what is your mother's maiden name?</option>
+                    <option value="favorite_food">what is your favorite food?</option>
                 </select>
             </div>
+
+            <!-- input for security question answer -->
             <div class="form-group">
-                <label for="security_answer">Security Answer</label>
+                <label for="security_answer">security answer</label>
                 <input type="text" id="security_answer" name="security_answer" required>
             </div>
+
+            <!-- file upload for profile image -->
             <div class="form-group">
-                <label for="profile_image">Profile Image</label>
+                <label for="profile_image">profile image</label>
                 <input type="file" id="profile_image" name="profile_image" accept="image/*" required>
             </div>
+
+            <!-- show error message if any -->
             {% if error %}
                 <div class="error-message">{{ error }}</div>
             {% endif %}
-            <button type="submit" class="btn-primary">Sign Up</button>
+
+            <!-- submit button for the form -->
+            <button type="submit" class="btn-primary">sign up</button>
         </form>
+
+        <!-- link to login page -->
         <div class="login-links">
-            <a href="{{ url_for('login') }}">Already have an account? Login</a>
+            <a href="{{ url_for('login') }}">already have an account? login</a>
         </div>
     </div>
+
+    <!-- javascript for form validation and toggle functionality -->
     <script>
-        // Simple client-side password match check
+        // check if password and confirm password match
         document.querySelector('.signup-form').addEventListener('submit', function(e) {
             const pwd = document.getElementById('password').value;
             const cpwd = document.getElementById('confirm_password').value;
             if (pwd !== cpwd) {
-                e.preventDefault();
-                alert('Passwords do not match!');
+                e.preventDefault(); // stop form submission
+                alert('passwords do not match!');
             }
         });
 
-        // Toggle password visibility
+        // function to show or hide password input
         function togglePassword(fieldId, toggleBtn) {
             const field = document.getElementById(fieldId);
             const type = field.getAttribute('type') === 'password' ? 'text' : 'password';
             field.setAttribute('type', type);
-            toggleBtn.textContent = type === 'password' ? 'Show' : 'Hide';
+            toggleBtn.textContent = type === 'password' ? 'show' : 'hide';
         }
-
-        
     </script>
 </body>
 </html>

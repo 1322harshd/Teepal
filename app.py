@@ -12,7 +12,7 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # set secret key for sessions
 
 # print static directory contents for debugging
-print(os.listdir('static'))
+#print(os.listdir('static'))
 
 # set upload folder for user images
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'users')

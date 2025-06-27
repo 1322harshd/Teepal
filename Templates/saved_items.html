@@ -1,34 +1,57 @@
-{% extends "base.html" %}
+{% extends "base.html" %}  <!-- this page uses base.html as its layout template -->
+
 {% block content %} 
 <h2>Saved Items</h2>
+
+<!-- main container for saved items -->
 <div id="saved_items" class="lists" style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+
+  <!-- check if there are no saved products -->
   {% if products|length == 0 %}
+    <!-- show empty message and link to go shopping -->
     <div class="empty-message" style="text-align:center; color:#888;">
       <i class="fa-solid fa-box-open" style="font-size:2.5rem; margin-bottom:10px;"></i><br>
-      No items here yet.<br>
-      <a href="{{ url_for('home') }}" class="btn-primary" style="margin-top:18px;">Go Shopping</a>
+      no items here yet.<br>
+      <a href="{{ url_for('home') }}" class="btn-primary" style="margin-top:18px;">go shopping</a>
     </div>
+
   {% else %}
+    <!-- loop through and display each saved product -->
     {% for product in products %}
       <div class="sc_1">
+        
+        <!-- product image -->
         <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.item }}" width="100">
+
+        <!-- middle section containing brand, name, and design info -->
         <div class="sc_1_middle">
           <span>{{ product.brand }}</span>
           <h5>{{ product.item }}</h5>
+
+          <!-- show custom design link if the product has a design image -->
           {% if product.DesignImage %}
             <a href="{{ url_for('product', product_id=product.ProductId) }}?design={{ product.DesignImage }}" style="color:#3bb77e; text-decoration:underline; cursor:pointer;">
-              Custom Design
+              custom design
             </a>
           {% endif %}
+
+          <!-- placeholder for displaying color palette circles using localStorage -->
           <div id="palette_{{ product.ProductId }}" class="saved-palette" style="display:flex;gap:8px;margin-top:8px;"></div>
         </div>
+
+        <!-- right section with actions -->
         <div class="sc_1_right">
+          <!-- remove button form -->
           <form class="remove-form" action="{{ url_for('remove_saved_item', product_id=product.ProductId) }}" method="POST">
             <button type="submit" title="Remove">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </form>
-          <button class="design-btn" onclick="window.location.href='/'">Design</button>
+
+          <!-- design button redirects to design page -->
+          <button class="design-btn" onclick="window.location.href='/'">design</button>
+
+          <!-- add to cart button form -->
           <form class="cart-form" action="{{ url_for('add_to_cart', product_id=product.ProductId) }}" method="POST">
             <button type="submit" class="cart-fab-btn" title="Add to Cart">
               <i class="fa-solid fa-shopping-cart"></i>
@@ -39,14 +62,19 @@
     {% endfor %}
   {% endif %}
 </div>
+
+<!-- javascript to display color palette saved in localStorage for each product -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     {% for product in products %}
+    // get palette data and selected color for this product from localStorage
     const palette = localStorage.getItem('palette_{{ product.ProductId }}');
     const selected = localStorage.getItem('selected_palette_color_{{ product.ProductId }}');
     const el = document.getElementById('palette_{{ product.ProductId }}');
+
+    // if palette exists, render each color as a small circle
     if (palette && el) {
-        const colors = JSON.parse(palette);
+        const colors = JSON.parse(palette);  // convert JSON string back to array
         el.innerHTML = colors.map(hex => 
             `<div title="${hex}" style="width:24px;height:24px;border-radius:50%;background:${hex};border:2px solid #eee;${selected === hex ? 'box-shadow:0 0 0 3px #3bb77e;' : ''}"></div>`
         ).join('');
@@ -54,4 +82,5 @@ document.addEventListener('DOMContentLoaded', function() {
     {% endfor %}
 });
 </script>
+
 {% endblock %}

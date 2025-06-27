@@ -1,211 +1,159 @@
-{% extends "base.html" %}<!-- this file extends from base.html-->
+{% extends "base.html" %} <!-- this template extends the base layout -->
+
 {% block content %}
 <h2>Shopping Cart</h2>
- 
+
+<!-- container to show saved items or cart content -->
 <div id="saved_items" class="lists" style="flex:1; display:flex; flex-direction:column; justify-content:center;">
-  {% if products|length == 0 %}<!-- if condition for showing empty list message-->
+
+  <!-- check if there are no products in the cart -->
+  {% if products|length == 0 %}
+    <!-- show empty cart message -->
     <div class="empty-message" style="text-align:center; color:#888;">
       <i class="fa-solid fa-box-open" style="font-size:2.5rem; margin-bottom:10px;"></i><br>
-      No items here yet.<br>
-      <a href="{{ url_for('home') }}" class="btn-primary" style="margin-top:18px;">Go Shopping</a><!-- go shopping link to redirect customers to products page-->
+      no items here yet.<br>
+      <!-- link to go back to home or shopping page -->
+      <a href="{{ url_for('home') }}" class="btn-primary" style="margin-top:18px;">go shopping</a>
     </div>
-  {% else %}<!-- else condition if lists have products in it -->
-   <div class="order-summary-card" id="orderSummary">
-  <h3>Order Summary</h3>
-  <div>
-    <span>Total Items: <span id="summaryTotalItems">0</span></span>
-    <span style="margin-left: 30px;">Total Price: $<span id="summaryTotalPrice">0.00</span></span>
-  </div>
-  <button class="payment-btn" onclick="openPaymentPopup()">Proceed to Payment</button><!-- payment button with js function to trigger payment functionality-->
-</div>
- 
-<!-- payment popup modal -->
-<div id="paymentModal" class="payment-modal" style="display:none;">
-  <div class="payment-modal-content">
-    <span class="close" onclick="closePaymentPopup()">&times;</span>
-    <h2 style="margin-bottom:18px;">Payment</h2>
-    <form onsubmit="return submitPayment(event)">
-      <div class="form-group">
-        <label for="cardNumber">Card Number</label>
-        <input type="text" id="cardNumber" maxlength="19" placeholder="1234 5678 9012 3456" required>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label for="expiry">Expiry</label>
-          <input type="text" id="expiry" maxlength="5" placeholder="MM/YY" required class="payment-input">
-        </div>
-        <div class="form-group">
-          <label for="cvv">CVV</label>
-          <input type="password" id="cvv" maxlength="4" placeholder="123" required class="payment-input">
-        </div>
-      </div>
-      <button type="submit" class="btn-primary" style="width:100%;margin-top:18px;">Pay $<span id="payAmount">0.00</span></button>
-    </form>
-  </div>
-</div>
-<div id="paymentSuccess" class="payment-modal" style="display:none;">
-  <div class="payment-modal-content" style="text-align:center;">
-    <h2>Payment Successful!</h2>
-    <p>Thank you for your purchase.</p>
-    <button class="btn-primary" onclick="closePaymentPopup()">Close</button>
-  </div>
-</div>
- 
-<!-- summary table for cart items -->
-<div class="cart-details-table">
-  <table>
-    <thead>
-      <tr>
-        <th>Item</th>
-        <th>Brand</th>
-        <th>Unit Price</th>
-        <th>Size</th>
-        <th>Quantity</th>
-        <th>Subtotal</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for product in products %}<!-- for loop for iterating over information in tabular format-->
-      <tr>
-        <td>
-          <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.item }}" class="cart-thumb">
-          <span class="cart-item-name">{{ product.item }}</span>
-        </td>
-        <td>{{ product.brand }}</td>
-        <td>${{ product.price }}</td>
-        <td>{{ product.Size if product.Size else 'M' }}</td>
-        <td>
-          <input type="number" name="quantity" id="table_quantity_{{ loop.index0 }}" value="1" min="1" onchange="updateTableTotal({ loop,index0 }, productPrices[{ loop,index0 }])"><!--dynamic quantity input-->
-        </td>
-        <td>$<span id="table_total_{{ loop.index0 }}">{{ product.price }}</span></td><!-- dynamic subtotal price according to quantity of items-->
-      </tr>
-      {% endfor %}
-    </tbody>
-    <tfoot>
-      <tr>
-        <td colspan="5" style="text-align:right;font-weight:bold;">Total:</td>
-        <td style="font-weight:bold;">$<span id="table_grand_total">0.00</span></td><!--  dynamic total price -->
-      </tr>
-    </tfoot>
-  </table>
-</div>
- 
-<div id="shopping_cart" class="lists">
-  {% for product in products %}
-    <div class="sc_1">
-      <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.item }}" width="100">
-      <div class="sc_1_middle">
-        <span>{{ product.brand }}</span>
-        <h5>{{ product.item }}</h5>
-        <span>Size: {{ product.Size if product.Size else 'M' }}</span><br>
-        <label class="quantity" for="quantity">Quantity:</label>
-        <input type="number" name="quantity" id="quantity_{{ loop.index0 }}" value="1" min="1" onchange="updateTotal({ loop,index0 }, productPrices[{ loop,index0 }])">
-        <span>× ${{ product.price }} = $<span id="total_{{ loop.index0 }}">{{ product.price }}</span></span>
-      </div>
-      <div class="sc_1_right">
-        <form class="remove-form" action="{{ url_for('remove_item', product_id=product.ProductId) }}" method="POST">
-          <button type="submit" title="Remove">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </form><br>
-        <button onclick="window.location.href='/'">Design</button>
-        <form class="save-form" action="{{ url_for('save_item', product_id=product.ProductId) }}" method="POST" style="display:inline;">
-          <button type="submit" title="Save" style="background:none; border:none; padding:0; cursor:pointer;">
-            <i class="fa-solid fa-heart"></i>
-          </button>
-        </form>
-      </div>
+
+  {% else %}
+  <!-- if there are items in the cart -->
+
+  <!-- order summary card with total items and total price -->
+  <div class="order-summary-card" id="orderSummary">
+    <h3>order summary</h3>
+    <div>
+      <span>total items: <span id="summaryTotalItems">0</span></span>
+      <span style="margin-left: 30px;">total price: $<span id="summaryTotalPrice">0.00</span></span>
     </div>
-  {% endfor %}
-</div>
- 
-<div id="blurOverlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.2); z-index:1000;"></div>
- 
-<script>
-  const productPrices = JSON.parse('{{ products | map(attribute="price") | list | tojson | safe }}');
- 
-  function updateTotal(index, price) {
-    const qty = document.getElementById('quantity_' + index).value;
-    document.getElementById('total_' + index).textContent = (qty * price).toFixed(2);
-    updateOrderSummary();
-    updateTableFromCart();
-  }
- 
-  function updateOrderSummary() {
-    let totalItems = 0;
-    let totalPrice = 0;
-    for (let i = 0; i < productPrices.length; i++) {
-      const qtyInput = document.getElementById('quantity_' + i);
-      const qty = qtyInput ? parseInt(qtyInput.value) || 0 : 0;
-      totalItems += qty;
-      totalPrice += qty * productPrices[i];
-    }
-    document.getElementById('summaryTotalItems').textContent = totalItems;
-    document.getElementById('summaryTotalPrice').textContent = totalPrice.toFixed(2);
-    document.getElementById('payAmount').textContent = totalPrice.toFixed(2);
-  }
- 
-  function updateTableTotal(index, price) {
-    const qty = document.getElementById('table_quantity_' + index).value;
-    document.getElementById('table_total_' + index).textContent = (qty * price).toFixed(2);
-    updateTableGrandTotal();
-    updateCartFromTable();
-  }
- 
-  function updateTableGrandTotal() {
-    let grandTotal = 0;
-    for (let i = 0; i < productPrices.length; i++) {
-      const qtyInput = document.getElementById('table_quantity_' + i);
-      const qty = qtyInput ? parseInt(qtyInput.value) || 0 : 0;
-      grandTotal += qty * productPrices[i];
-    }
-    document.getElementById('table_grand_total').textContent = grandTotal.toFixed(2);
-  }
- 
-  function updateCartFromTable() {
-    for (let i = 0; i < productPrices.length; i++) {
-      const tableQty = document.getElementById('table_quantity_' + i).value;
-      document.getElementById('quantity_' + i).value = tableQty;
-      document.getElementById('total_' + i).textContent = (tableQty * productPrices[i]).toFixed(2);
-    }
-    updateOrderSummary();
-  }
- 
-  function updateTableFromCart() {
-    for (let i = 0; i < productPrices.length; i++) {
-      const cartQty = document.getElementById('quantity_' + i).value;
-      document.getElementById('table_quantity_' + i).value = cartQty;
-      document.getElementById('table_total_' + i).textContent = (cartQty * productPrices[i]).toFixed(2);
-    }
-    updateTableGrandTotal();
-  }
- 
-  function openPaymentPopup() {
-    document.getElementById('paymentModal').style.display = 'flex';
-    document.getElementById('blurOverlay').style.display = 'block';
-    updateOrderSummary();
-  }
-  function closePaymentPopup() {
-    document.getElementById('paymentModal').style.display = 'none';
-    document.getElementById('paymentSuccess').style.display = 'none';
-    document.getElementById('blurOverlay').style.display = 'none';
-  }
-  function submitPayment(e) {
-    e.preventDefault();
-    document.getElementById('paymentModal').style.display = 'none';
-    document.getElementById('blurOverlay').style.display = 'none';
-    document.getElementById('checkoutForm').submit();
-    return false;
-  }
- 
-  window.onload = function() {
-    updateOrderSummary();
-    updateTableGrandTotal();
-  };
-</script>
- 
-<form id="checkoutForm" action="{{ url_for('checkout') }}" method="POST" style="display:none;"></form>
- 
-  {% endif %}
-</div>
-{% endblock %}
+    <!-- button to trigger payment modal -->
+    <button class="payment-btn" onclick="openPaymentPopup()">proceed to payment</button>
+  </div>
+
+  <!-- payment popup form -->
+  <div id="paymentModal" class="payment-modal" style="display:none;">
+    <div class="payment-modal-content">
+      <!-- close button -->
+      <span class="close" onclick="closePaymentPopup()">&times;</span>
+      <h2 style="margin-bottom:18px;">payment</h2>
+
+      <!-- fake payment form -->
+      <form onsubmit="return submitPayment(event)">
+        <div class="form-group">
+          <label for="cardNumber">card number</label>
+          <input type="text" id="cardNumber" maxlength="19" placeholder="1234 5678 9012 3456" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="expiry">expiry</label>
+            <input type="text" id="expiry" maxlength="5" placeholder="MM/YY" required class="payment-input">
+          </div>
+          <div class="form-group">
+            <label for="cvv">cvv</label>
+            <input type="password" id="cvv" maxlength="4" placeholder="123" required class="payment-input">
+          </div>
+        </div>
+        <!-- pay button shows total amount -->
+        <button type="submit" class="btn-primary" style="width:100%;margin-top:18px;">pay $<span id="payAmount">0.00</span></button>
+      </form>
+    </div>
+  </div>
+
+  <!-- payment success popup -->
+  <div id="paymentSuccess" class="payment-modal" style="display:none;">
+    <div class="payment-modal-content" style="text-align:center;">
+      <h2>payment successful!</h2>
+      <p>thank you for your purchase.</p>
+      <button class="btn-primary" onclick="closePaymentPopup()">close</button>
+    </div>
+  </div>
+
+  <!-- table view of cart items -->
+  <div class="cart-details-table">
+    <table>
+      <thead>
+        <tr>
+          <th>item</th>
+          <th>brand</th>
+          <th>unit price</th>
+          <th>size</th>
+          <th>quantity</th>
+          <th>subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- loop through each product to display in table -->
+        {% for product in products %}
+        <tr>
+          <td>
+            <!-- show product image and name -->
+            <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.item }}" class="cart-thumb">
+            <span class="cart-item-name">{{ product.item }}</span>
+          </td>
+          <td>{{ product.brand }}</td>
+          <td>${{ product.price }}</td>
+          <td>{{ product.Size if product.Size else 'M' }}</td>
+          <td>
+            <!-- input to change quantity -->
+            <input type="number" name="quantity" id="table_quantity_{{ loop.index0 }}" value="1" min="1" onchange="updateTableTotal({ loop,index0 }, productPrices[{ loop,index0 }])">
+          </td>
+          <!-- subtotal for each product -->
+          <td>$<span id="table_total_{{ loop.index0 }}">{{ product.price }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <!-- final total row -->
+        <tr>
+          <td colspan="5" style="text-align:right;font-weight:bold;">total:</td>
+          <td style="font-weight:bold;">$<span id="table_grand_total">0.00</span></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- detailed view of each product in cart with remove/save buttons -->
+  <div id="shopping_cart" class="lists">
+    {% for product in products %}
+      <div class="sc_1">
+        <!-- product image -->
+        <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.item }}" width="100">
+        <div class="sc_1_middle">
+          <span>{{ product.brand }}</span>
+          <h5>{{ product.item }}</h5>
+          <span>size: {{ product.Size if product.Size else 'M' }}</span><br>
+          <label class="quantity" for="quantity">quantity:</label>
+          <!-- input to change quantity -->
+          <input type="number" name="quantity" id="quantity_{{ loop.index0 }}" value="1" min="1" onchange="updateTotal({ loop,index0 }, productPrices[{ loop,index0 }])">
+          <!-- show calculated subtotal -->
+          <span>× ${{ product.price }} = $<span id="total_{{ loop.index0 }}">{{ product.price }}</span></span>
+        </div>
+        <div class="sc_1_right">
+          <!-- form to remove item from cart -->
+          <form class="remove-form" action="{{ url_for('remove_item', product_id=product.ProductId) }}" method="POST">
+            <button type="submit" title="remove">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </form><br>
+          <!-- go back to design page -->
+          <button onclick="window.location.href='/'">design</button>
+          <!-- form to save item to wishlist -->
+          <form class="save-form" action="{{ url_for('save_item', product_id=product.ProductId) }}" method="POST" style="display:inline;">
+            <button type="submit" title="save" style="background:none; border:none; padding:0; cursor:pointer;">
+              <i class="fa-solid fa-heart"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- background blur overlay for popup -->
+  <div id="blurOverlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.2); z-index:1000;"></div>
+
+  <!-- javascript for dynamic price and popup handling -->
+  <script>
+    // get product prices from backend as an array
+    const productPrices = JSON.parse('{{ products | map(attribute="price") | list | tojson | safe }}');
+
+    // updates subtotal and total wh

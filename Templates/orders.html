@@ -1,31 +1,47 @@
-{% extends "base.html" %}
+{% extends "base.html" %}  <!-- this page extends from the base.html layout -->
+
 {% block content %} 
 <h2>My Orders</h2>
+
+<!-- main container for displaying the list of user orders -->
 <div id="orders_list" class="lists" style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+
+  <!-- if there are no products (i.e., no orders), show this empty message -->
   {% if products|length == 0 %}
     <div class="empty-message" style="text-align:center; color:#888;">
       <i class="fa-solid fa-box-open" style="font-size:2.5rem; margin-bottom:10px;"></i><br>
-      No items here yet.<br>
-      <a href="{{ url_for('home') }}" class="btn-primary" style="margin-top:18px;">Go Shopping</a>
+      no items here yet.<br>
+      <a href="{{ url_for('home') }}" class="btn-primary" style="margin-top:18px;">go shopping</a>
     </div>
+
   {% else %}
+    <!-- loop through the list of ordered products -->
     {% for product in products %}
       <div class="sc_1">
+
+        <!-- show the product image -->
         <img src="{{ url_for('static', filename=product.Image) }}" alt="{{ product.Item }}" width="100">
+
+        <!-- middle section with order details -->
         <div class="sc_1_middle">
-          <span>{{ product.Brand }}</span>
-          <h5>{{ product.Item }}</h5>
-          <span>Qty: {{ product.Quantity }}</span><br>
-          <span>Price: ${{ product.PriceAtPurchase }}</span>
+          <span>{{ product.Brand }}</span>  <!-- brand name -->
+          <h5>{{ product.Item }}</h5>       <!-- product name -->
+          <span>qty: {{ product.Quantity }}</span><br> <!-- quantity ordered -->
+          <span>price: ${{ product.PriceAtPurchase }}</span> <!-- price at time of order -->
+
+          <!-- extra details about order like status and delivery -->
           <div style="margin-top:8px; color:#1abc9c; font-size:15px;">
-            Ordered At: {{ product.OrderedAt }}<br>
-            <strong>Status:</strong> {{ product.Status }}<br>
-            <strong>Arrival Date:</strong> {{ product.ArrivalDate }}
+            ordered at: {{ product.OrderedAt }}<br>
+            <strong>status:</strong> {{ product.Status }}<br>
+            <strong>arrival date:</strong> {{ product.ArrivalDate }}
           </div>
         </div>
+
+        <!-- right section with a reorder button -->
         <div class="sc_1_right">
-          <button onclick="window.location.href='/'">Reorder</button>
+          <button onclick="window.location.href='/'">reorder</button>
         </div>
+
       </div>
     {% endfor %}
   {% endif %}

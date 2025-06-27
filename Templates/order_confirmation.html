@@ -1,9 +1,10 @@
-{% extends "base.html" %}
+{% extends "base.html" %}  <!-- uses base layout -->
+
 {% block content %}
   <div style="text-align:center; margin-top:40px;">
-    <h2>Order Placed Successfully!</h2>
+    <h2>Order Placed Successfully!</h2>  <!-- success heading -->
     <p>Your order has been placed and is being processed.</p>
-    <p><strong>Estimated Arrival Date:</strong> {{ arrival_date }}</p>
-    <a href="{{ url_for('orders') }}" class="btn-primary" style="margin-top:20px;">View My Orders</a>
+    <p><strong>Estimated Arrival Date:</strong> {{ arrival_date }}</p>  <!-- dynamic arrival date -->
+    <a href="{{ url_for('orders') }}" class="btn-primary" style="margin-top:20px;">View My Orders</a>  <!-- button to orders page -->
   </div>
 {% endblock %}
